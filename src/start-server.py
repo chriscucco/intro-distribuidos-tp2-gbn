@@ -7,6 +7,8 @@ def main():
 
     if helpParam:
         return printHelp()
+    
+    
 
     Logger.log("Not implemented")
     return
