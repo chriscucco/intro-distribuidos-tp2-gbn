@@ -19,6 +19,8 @@ class ServerConnection:
     def process(s, files, msg, addr, sPath, v, q):
         if msg[0] == 'U':
             ServerConnection.startUpload(s, files, msg[1:], addr, sPath, v, q)
+        elif msg[0] == 'D':
+            ServerConnection.startDownload(s, files, msg[1:], addr, sPath, v, q)
         return
 
     def startUpload(s, files, message, addr, sPath, verbose, quiet):
@@ -27,7 +29,21 @@ class ServerConnection:
             files[message] = file
             CommonConnection.sendACK(s, addr[0], addr[1], 'U', message, 0)
         except Exception:
-            Logger.logIfNotQuiet("Error opening file " + message)
+            Logger.logIfNotQuiet(quiet, "Error opening file " + message)
+            CommonConnection.sendError(s, addr[0], addr[1])
+            return
+        return
+
+    def startDownload(s, files, filename, addr, sPath, verbose, quiet):
+        try:
+            file = open(sPath+filename, "rb")
+            files[filename] = file
+            data = file.read(Constants.getMaxReadSize())
+            host = addr[0]
+            port = addr[1]
+            CommonConnection.sendMessage(s, host, port, filename, data, 0)
+        except Exception:
+            Logger.logIfNotQuiet("Error opening file " + filename)
             CommonConnection.sendError(s, addr[0], addr[1])
             return
         return
