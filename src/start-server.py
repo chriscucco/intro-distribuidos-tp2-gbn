@@ -1,5 +1,8 @@
 from lib.params.serverParamsValidation import ServerParams
+from lib.serverConnection.serverConnection import ServerConnection
 from lib.logger.logger import Logger
+from threading import Thread
+import socket
 
 
 def main():
@@ -7,10 +10,43 @@ def main():
 
     if helpParam:
         return printHelp()
-    
-    
 
-    Logger.log("Not implemented")
+    Logger.log("Server started in host: " + host + " and port: " + str(port))
+
+    srvSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    Logger.logIfNotQuiet(quiet, "Server socket successfully created")
+
+    try:
+        srvSock.bind((host, port))
+        Logger.logIfVerbose(verbose, "Server socket binded")
+    except socket.error:
+        Logger.log("Error binding socket")
+        return
+
+    files = {}
+    t = Thread(target=start, args=(srvSock, files, sPath, verbose, quiet))
+    t.start()
+
+    serverOn = True
+    while serverOn:
+        value = input()
+        if value == 'exit':
+            serverOn = False
+
+    srvSock.close()
+    t.join()
+    for key, f in files.items():
+        try:
+            f.close
+            Logger.logIfVerbose(verbose, "File " + key + " closed")
+        except Exception:
+            Logger.logIfVerbose(verbose, "Error closing file: " + key)
+    Logger.log('Server closed')
+    return
+
+
+def start(socket, files, sPath, verbose, quiet):
+    ServerConnection.startCommunicating(socket, files, sPath, verbose, quiet)
     return
 
 
