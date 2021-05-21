@@ -29,7 +29,7 @@ class CommonConnection:
             return
         return
 
-    def sendMessage(socket, host, port, filename, message, 
+    def sendMessage(socket, host, port, filename, message,
                     bytesAlreadyReceived):
         addr = (host, port)
         data = Constants.fileTransferProtocol() + filename + ";"

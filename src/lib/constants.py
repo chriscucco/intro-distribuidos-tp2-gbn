@@ -5,6 +5,7 @@ DOWNLOAD = "D"
 UPLOAD = "U"
 TRANSFER = "T"
 ACK = "A"
+END = "E"
 ERROR = "F"
 
 
@@ -30,3 +31,6 @@ class Constants:
 
     def errorProtocol():
         return ERROR
+
+    def endProtocol():
+        return END

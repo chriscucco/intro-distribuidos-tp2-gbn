@@ -17,11 +17,16 @@ class ServerConnection:
             return
 
     def process(s, files, msg, addr, sPath, v, q):
-        if msg[0] == 'U':
-            ServerConnection.startUpload(s, files, msg[1:], addr, sPath, v, q)
-        elif msg[0] == 'D':
-            ServerConnection.startDownload(s, files, msg[1:], addr, sPath, v,
-                                           q)
+        mode = msg[0]
+        data = msg[1:]
+        if mode == Constants.uploadProtocol():
+            ServerConnection.startUpload(s, files, data, addr, sPath, v, q)
+        elif mode == Constants.downloadProtocol():
+            ServerConnection.startDownload(s, files, data, addr, sPath, v, q)
+        elif mode == Constants.errorProtocol():
+            ServerConnection.processError(s, files, data, addr, v, q)
+        elif mode == Constants.endProtocol():
+            ServerConnection.processEnd(s, files, data, addr, v, q)
         return
 
     def startUpload(s, files, message, addr, sPath, verbose, quiet):
@@ -46,5 +51,21 @@ class ServerConnection:
         except Exception:
             Logger.logIfNotQuiet("Error opening file " + filename)
             CommonConnection.sendError(s, addr[0], addr[1])
+            return
+        return
+
+    def processError(s, files, filename, addr, sPath, verbose, quiet):
+        try:
+            files[filename].close()
+            CommonConnection.sendACK(s, addr[0], addr[1], 'F', filename, 0)
+        except Exception:
+            return
+        return
+
+    def processEnd(s, files, filename, addr, sPath, verbose, quiet):
+        try:
+            files[filename].close()
+            CommonConnection.sendACK(s, addr[0], addr[1], 'E', filename, 0)
+        except Exception:
             return
         return
