@@ -1,12 +1,15 @@
 
 DATA_CHUNK = 1024
 MAX_READ_SIZE = 950
-DOWNLOAD = "download"
-UPLOAD = "upload"
-OK = "OK"
+DOWNLOAD = "D"
+UPLOAD = "U"
+TRANSFER = "T"
+ACK = "A"
+ERROR = "F"
 
 
 class Constants:
+
     def bytesChunk():
         return DATA_CHUNK
 
@@ -19,5 +22,11 @@ class Constants:
     def downloadProtocol():
         return DOWNLOAD
 
-    def okProtocol():
-        return OK
+    def fileTransferProtocol():
+        return TRANSFER
+
+    def ackProtocol():
+        return ACK
+
+    def errorProtocol():
+        return ERROR

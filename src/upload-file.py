@@ -1,5 +1,7 @@
+import socket
 from lib.params.uploadClientParamsValidation import UploadClientParams
 from lib.logger.logger import Logger
+from lib.clientConnection.clientUpload import ClientUpload
 
 
 def main():
@@ -8,7 +10,22 @@ def main():
     if h:
         return printHelp()
 
-    Logger.log("Not implemented")
+    try:
+        Logger.logIfVerbose(verb, 'Opening file: ' + fName)
+        file = open(fSource + fName, "rb")
+    except OSError:
+        Logger.log("Error opening file " + fSource + fName)
+        return
+
+    sckt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    Logger.logIfVerbose(verb, "Creating socket...")
+
+    clientUpload = ClientUpload()
+
+    clientUpload.upload(sckt, host, port, file, fName, verb, quiet)
+
+    # Se cierra cliente
+    sckt.close()
     return
 
 

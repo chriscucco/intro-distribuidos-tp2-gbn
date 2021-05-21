@@ -20,7 +20,8 @@ class ServerConnection:
         if msg[0] == 'U':
             ServerConnection.startUpload(s, files, msg[1:], addr, sPath, v, q)
         elif msg[0] == 'D':
-            ServerConnection.startDownload(s, files, msg[1:], addr, sPath, v, q)
+            ServerConnection.startDownload(s, files, msg[1:], addr, sPath, v,
+                                           q)
         return
 
     def startUpload(s, files, message, addr, sPath, verbose, quiet):

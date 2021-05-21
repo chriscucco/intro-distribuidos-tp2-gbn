@@ -1,5 +1,8 @@
+from lib.constants import Constants
+
 
 class CommonConnection:
+
     def sendACK(socket, host, port, mode, filename, lastBytesReceived):
         addr = (host, port)
         message = 'A'+mode+filename+';'+str(lastBytesReceived)
@@ -17,7 +20,7 @@ class CommonConnection:
             return
         return
 
-    def sendEndFile(socket, host, port, filename, lastBytesReceived):
+    def sendEndFile(socket, host, port, filename, bytesAlreadyReceived):
         addr = (host, port)
         message = 'E'+filename
         try:
@@ -26,9 +29,11 @@ class CommonConnection:
             return
         return
 
-    def sendMessage(socket, host, port, filename, message, lastBytesReceived):
+    def sendMessage(socket, host, port, filename, message, 
+                    bytesAlreadyReceived):
         addr = (host, port)
-        data = 'T'+filename+";"+str(lastBytesReceived)+";"+message
+        data = Constants.fileTransferProtocol() + filename + ";"
+        data += str(bytesAlreadyReceived) + ";" + message
         try:
             socket.sendto(data.encode(), addr)
         except socket.error:
