@@ -1,6 +1,7 @@
 from lib.constants import Constants
 from lib.commonConnection.commonConnection import CommonConnection
 from lib.logger.logger import Logger
+import os
 
 
 class ServerConnection:
@@ -13,7 +14,6 @@ class ServerConnection:
                 ServerConnection.process(s, files, msg, addr, sPath, v, q)
             return
         except Exception:
-            print("Error")
             return
 
     def process(s, files, msg, addr, sPath, v, q):
@@ -27,6 +27,8 @@ class ServerConnection:
             ServerConnection.processError(s, files, data, addr, v, q)
         elif mode == Constants.endProtocol():
             ServerConnection.processEnd(s, files, data, addr, v, q)
+        elif mode == Constants.ackProtocol():
+            ServerConnection.processAck(s, files, data, addr, v, q)
         return
 
     def startUpload(s, files, message, addr, sPath, verbose, quiet):
@@ -54,7 +56,7 @@ class ServerConnection:
             return
         return
 
-    def processError(s, files, filename, addr, sPath, verbose, quiet):
+    def processError(s, files, filename, addr, verbose, quiet):
         try:
             files[filename].close()
             CommonConnection.sendACK(s, addr[0], addr[1], 'F', filename, 0)
@@ -62,10 +64,32 @@ class ServerConnection:
             return
         return
 
-    def processEnd(s, files, filename, addr, sPath, verbose, quiet):
+    def processEnd(s, files, filename, addr, verbose, quiet):
         try:
             files[filename].close()
             CommonConnection.sendACK(s, addr[0], addr[1], 'E', filename, 0)
         except Exception:
             return
+        return
+
+    def processAck(s, files, data, addr, v, q):
+        mode = data[0]
+        processedData = data[1:]
+        if mode == Constants.endProtocol() or mode == Constants.endProtocol():
+            return
+        elif mode == Constants.downloadProtocol():
+            separatorPossition = processedData.find(';')
+            fname = processedData[0:separatorPossition]
+            bRecv = int(processedData[separatorPossition+1:])
+            f = files[fname]
+            return ServerConnection.download(s, f, fname, bRecv, addr, v, q)
+        return
+
+    def download(s, f, fname, br, addr, v, q):
+        f.seek(br, os.SEEK_SET)
+        data = f.read(Constants.getMaxReadSize())
+        if len(data) == 0:
+            CommonConnection.sendEndFile(s, addr[0], addr[1], fname, 0)
+        else:
+            CommonConnection.sendMessage(s, addr[0], addr[1], fname, data, br)
         return

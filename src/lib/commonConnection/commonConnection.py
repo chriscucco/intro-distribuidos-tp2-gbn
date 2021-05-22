@@ -29,13 +29,14 @@ class CommonConnection:
             return
         return
 
-    def sendMessage(socket, host, port, filename, message,
-                    bytesAlreadyReceived):
+    def sendMessage(socket, host, port, filename, message, bytesReceived):
         addr = (host, port)
         data = Constants.fileTransferProtocol() + filename + ";"
-        data += str(bytesAlreadyReceived) + ";" + message
+        data += str(bytesReceived) + ";"
+        data = data.encode() + message
         try:
-            socket.sendto(data.encode(), addr)
+            socket.sendto(data, addr)
         except socket.error:
+            print('ERRORSOCKET')
             return
         return
