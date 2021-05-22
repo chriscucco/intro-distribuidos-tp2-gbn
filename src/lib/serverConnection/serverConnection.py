@@ -44,7 +44,7 @@ class ServerConnection:
             CommonConnection.sendError(s, message, addr[0], addr[1])
             return
         return
-    
+
     def processTransfer(s, files, data, addr, v, q):
         separatorPossition = data.find(';')
         fname = data[0:separatorPossition]
