@@ -12,10 +12,11 @@ class CommonConnection:
             return
         return
 
-    def sendError(socket, host, port):
+    def sendError(socket, filename, host, port):
         addr = (host, port)
         try:
-            socket.sendto('F'.encode(), addr)
+            msg = 'F'+filename
+            socket.sendto(msg.encode(), addr)
         except socket.error:
             return
         return
