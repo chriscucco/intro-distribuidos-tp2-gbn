@@ -115,5 +115,5 @@ class ServerConnection:
         f.seek(bytesRecv, os.SEEK_SET)
         f.write(msg.encode())
         filesize = FileHelper.getFileSize(f)
-        CommonConnection.sendACK(s, addr[0], addr[1], 'U', fname, filesize)
+        CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, filesize)
         return
