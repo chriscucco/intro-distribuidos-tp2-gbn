@@ -23,7 +23,6 @@ class QueueHandler:
         return
 
     def makeSimpleExpected(currentMsg, addr):
-        print('makeSimpleExpected')
         expected = 'A' + currentMsg + ';0' + '-' + addr[0] + '-' + str(addr[1])
         ttl = datetime.datetime.now() + datetime.timedelta(seconds=2)
         d = dict()
