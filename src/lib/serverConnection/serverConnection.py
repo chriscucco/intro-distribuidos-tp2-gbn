@@ -11,13 +11,14 @@ class Connection:
         try:
             while True:
                 data, addr = s.recvfrom(Constants.bytesChunk())
-                Logger.logIfVerbose(v, "Recieved message from: " + addr)
+                Logger.logIfVerbose(v, "Recieved message from: " + str(addr))
                 msg = data.decode()
-                queuedMessage = msg + '-' + addr[0] + '-' + str(addr[1])
+                queuedMessage = msg + '-' + str(addr[0]) + '-' + str(addr[1])
                 recvMsg[queuedMessage] = True
                 Connection.process(s, fs, msg, addr, sPath, queue, v, q)
             return
-        except Exception:
+        except Exception as e:
+            print(e)
             return
 
     def process(s, f, msg, addr, pth, queue, v, q):
@@ -40,11 +41,12 @@ class Connection:
     def startUpload(s, files, message, addr, sPath, msgQueue, verbose, quiet):
         try:
             file = open(sPath+message, "wb")
+            print("direccion creacion archivo ", sPath+message)
             Logger.logIfVerbose(verbose, "File " + message + " opened")
             files[message] = file
-            Logger.logIfVerbose(verbose, "Sending ACK to client: " + addr)
+            Logger.logIfVerbose(verbose, "Sending ACK to client: " + str(addr))
             CommonConnection.sendACK(s, addr[0], addr[1], 'U', message, 0)
-        except Exception:
+        except OSError:
             Logger.logIfNotQuiet(quiet, "Error opening file " + message)
             msg = CommonConnection.sendError(s, message, addr[0], addr[1])
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
@@ -61,7 +63,8 @@ class Connection:
         try:
             f = files[fname]
             Connection.upload(s, f, fname, bytesRecv, msg, addr, v, q)
-        except Exception:
+        except Exception as e:
+            print(e)
             Logger.logIfNotQuiet(q, "Error processing transfer")
             msg = CommonConnection.sendError(s, fname, addr[0], addr[1])
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
@@ -74,7 +77,7 @@ class Connection:
             data = file.read(Constants.getMaxReadSize())
             h = addr[0]
             p = addr[1]
-            Logger.logIfVerbose(v, "Sending message to client: " + addr)
+            Logger.logIfVerbose(v, "Sending message to client: " + str(addr))
             msg = CommonConnection.sendMessage(s, h, p, filename, data, 0)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
         except Exception:
@@ -87,7 +90,7 @@ class Connection:
     def processError(s, files, filename, addr, v, q):
         try:
             files[filename].close()
-            Logger.logIfVerbose(v, "Sending ACK to client: " + addr)
+            Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
             CommonConnection.sendACK(s, addr[0], addr[1], 'F', filename, 0)
         except Exception:
             Logger.logIfNotQuiet(q, "Error processing error")
@@ -97,7 +100,7 @@ class Connection:
     def processEnd(s, files, filename, addr, v, q):
         try:
             files[filename].close()
-            Logger.logIfVerbose(v, "Sending ACK to client: " + addr)
+            Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
             CommonConnection.sendACK(s, addr[0], addr[1], 'E', filename, 0)
         except Exception:
             Logger.logIfNotQuiet(q, "Error processing end file")
@@ -122,13 +125,13 @@ class Connection:
         Logger.logIfVerbose(v, "Reading file " + fname)
         data = f.read(Constants.getMaxReadSize())
         if len(data) == 0:
-            Logger.logIfVerbose(v, "Sending EndFile to client: " + addr)
+            Logger.logIfVerbose(v, "Sending EndFile to client: " + str(addr))
             msg = CommonConnection.sendEndFile(s, addr[0], addr[1], fname, 0)
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
         else:
             h = addr[0]
             port = addr[1]
-            Logger.logIfVerbose(v, "Sending message to client: " + addr)
+            Logger.logIfVerbose(v, "Sending message to client: " + str(addr))
             msg = CommonConnection.sendMessage(s, h, port, fname, data, br)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
         return
@@ -138,6 +141,6 @@ class Connection:
         Logger.logIfVerbose(v, "Writing file " + fname)
         f.write(msg.encode())
         filesize = FileHelper.getFileSize(f)
-        Logger.logIfVerbose(v, "Sending ACK to client: " + addr)
+        Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
         CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, filesize)
         return

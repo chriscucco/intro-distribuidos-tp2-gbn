@@ -1,12 +1,14 @@
+import os
+
 from lib.constants import Constants
 from lib.commonConnection.commonConnection import CommonConnection
-from lib.helpers.fileHelper import FileHelper
 
 
 class ClientUpload:
 
     def upload(self, sckt, host, port, file, fName, verbose, quiet):
 
+        # hacer while hasta que recibe ack, y ahi continuar
         msg = ""
 
         message = Constants.uploadProtocol() + fName
@@ -14,69 +16,44 @@ class ClientUpload:
 
         data, addr = sckt.recvfrom(Constants.bytesChunk())
         msg = data.decode()
+        print("recibio ack" + msg)
 
-        if msg[0] == Constants.ackProtocol():
+        if msg[0] == Constants.errorProtocol():
+            CommonConnection.sendACK(sckt, host, port, 'F', fName, 0)
             file.close()
             return
 
         bytesAlreadySent = 0
-        fileSize = FileHelper.getFileSize(file)
 
-        while bytesAlreadySent < fileSize:
-
+        while True:
+            file.seek(bytesAlreadySent, os.SEEK_SET)
             message = file.read(Constants.getMaxReadSize())
+
+            if len(message) == 0:
+                CommonConnection.sendEndFile(sckt, host, port, fName,
+                                             bytesAlreadySent)
+                # hacer while hasta q recibe ack
+                data, addr = sckt.recvfrom(Constants.bytesChunk())
+                msg = data.decode()
+
+                if msg[0] == Constants.ackProtocol():
+                    break
+
             CommonConnection.sendMessage(sckt, host, port, fName, message,
                                          bytesAlreadySent)
 
             data, addr = sckt.recvfrom(Constants.bytesChunk())
             msg = data.decode()
 
+            if msg[0] == Constants.errorProtocol():
+                CommonConnection.sendACK(sckt, host, port, 'F', fName,
+                                         bytesAlreadySent)
+                file.close()
+                return
+
             if msg[0] == Constants.ackProtocol():
                 splittedMsg = msg.split(';')
-                bytesAlreadySent += int(splittedMsg[1])
-
-            '''Logger.logIfVerbose(verbose, "Sending upload code to server")
-        sckt.send(Constants.uploadProtocol().encode())
-        data = sckt.recv(Constants.bytesChunk())
-        confirmation = data.decode()
-
-        if (confirmation != Constants.okProtocol()):
-            Logger.log("Server cant process upload work")
-            return
-
-        Logger.logIfVerbose(verbose, "Sending name of file to server")
-        sckt.send(fName.encode())
-        data = sckt.recv(Constants.bytesChunk())
-
-        confirmation = data.decode()
-
-        validation = self.__validateConfirmation(file, confirmation,
-                                                 "Server cant work with file: "
-                                                 + fName)
-
-        if (validation is False):
-            return
-
-        Logger.logIfVerbose(verbose, "Sending size of file")
-        FileTransfer.sendFileSize(sckt, file, verbose, quiet)
-        data = sckt.recv(Constants.bytesChunk())
-        confirmation = data.decode()
-
-        validation = self.__validateConfirmation(file, confirmation,
-                                                 "Server cant process file" +
-                                                 " size")
-
-        if (validation is False):
-            return
-
-        Logger.logIfNotQuiet(quiet, "Sending file to server...")
-        FileTransfer.sendFile(sckt, file, Constants.bytesChunk())
-
-        data = sckt.recv(Constants.bytesChunk())
-        confirmation = data.decode()
-
-        if (confirmation != Constants.okProtocol()):
-            Logger.log("Server cant save file.")'''
+                bytesAlreadySent = int(splittedMsg[1])
 
         file.close()
 
