@@ -1,9 +1,11 @@
 import datetime
 import time
+from lib.logger.logger import Logger
 
 
 class QueueHandler:
     def handleQueue(srvSock, msgQueue, recvMsg, v):
+        Logger.logIfVerbose(v, "Handler queue initialized")
         while True:
             item = msgQueue.get()
             if item == 'exit':
@@ -54,6 +56,7 @@ class QueueHandler:
     def retry(srvSock, item, msgQueue, v):
         addr = item['addr']
         message = item['msg']
+        Logger.logIfVerbose(v, "Retrying package to client: " + addr)
         srvSock.sendto(message.encode(), addr)
         item['ttl'] = datetime.datetime.now() + datetime.timedelta(seconds=2)
         msgQueue.put(item)

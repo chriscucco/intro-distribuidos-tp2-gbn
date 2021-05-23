@@ -39,6 +39,7 @@ def main():
         if value == 'exit':
             serverOn = False
 
+    Logger.logIfNotQuiet(q, "Closing server...")
     msgQueue.put('exit')
     skt.close()
     t.join()
@@ -48,7 +49,7 @@ def main():
             f.close
             Logger.logIfVerbose(v, "File " + key + " closed")
         except Exception:
-            Logger.logIfVerbose(v, "Error closing file: " + key)
+            Logger.logIfNotQuiet(q, "Error closing file: " + key)
     Logger.log('Server closed')
     return
 
