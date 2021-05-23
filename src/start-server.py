@@ -1,5 +1,5 @@
 from lib.params.serverParamsValidation import ServerParams
-from lib.serverConnection.serverConnection import ServerConnection
+from lib.serverConnection.serverConnection import Connection
 from lib.serverConnection.queueHandler import QueueHandler
 from lib.logger.logger import Logger
 from threading import Thread
@@ -8,19 +8,19 @@ import queue
 
 
 def main():
-    host, port, sPath, verbose, quiet, helpParam = ServerParams.validate()
+    host, port, sPath, v, q, helpParam = ServerParams.validate()
 
     if helpParam:
         return printHelp()
 
     Logger.log("Server started in host: " + host + " and port: " + str(port))
 
-    srvSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    Logger.logIfNotQuiet(quiet, "Server socket successfully created")
+    skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    Logger.logIfNotQuiet(q, "Server socket successfully created")
 
     try:
-        srvSock.bind((host, port))
-        Logger.logIfVerbose(verbose, "Server socket binded")
+        skt.bind((host, port))
+        Logger.logIfVerbose(v, "Server socket binded")
     except socket.error:
         Logger.log("Error binding socket")
         return
@@ -29,8 +29,8 @@ def main():
 
     msgQueue = queue.Queue()
     recvMsg = {}
-    queueThread = Thread(target=runQueue, args=(srvSock, msgQueue, recvMsg, verbose))
-    t = Thread(target=start, args=(srvSock, files, sPath, msgQueue, recvMsg, verbose, quiet))
+    queueThread = Thread(target=runQueue, args=(skt, msgQueue, recvMsg, v))
+    t = Thread(target=run, args=(skt, files, sPath, msgQueue, recvMsg, v, q))
     t.start()
     queueThread.start()
     serverOn = True
@@ -39,27 +39,27 @@ def main():
         if value == 'exit':
             serverOn = False
 
-    enabled = False
     msgQueue.put('exit')
-    srvSock.close()
+    skt.close()
     t.join()
     queueThread.join()
     for key, f in files.items():
         try:
             f.close
-            Logger.logIfVerbose(verbose, "File " + key + " closed")
+            Logger.logIfVerbose(v, "File " + key + " closed")
         except Exception:
-            Logger.logIfVerbose(verbose, "Error closing file: " + key)
+            Logger.logIfVerbose(v, "Error closing file: " + key)
     Logger.log('Server closed')
     return
 
 
-def start(socket, files, sPath, msgQueue, recvMsg, verbose, quiet):
-    ServerConnection.startCommunicating(socket, files, sPath, msgQueue, recvMsg, verbose, quiet)
+def run(s, f, sPath, msgQueue, recvMsg, v, q):
+    Connection.startCommunicating(s, f, sPath, msgQueue, recvMsg, v, q)
     return
 
-def runQueue(srvSock, msgQueue, recvMsg, v):
-    QueueHandler.handleQueue(srvSock, msgQueue, recvMsg, v)
+
+def runQueue(skt, msgQueue, recvMsg, v):
+    QueueHandler.handleQueue(skt, msgQueue, recvMsg, v)
     return
 
 

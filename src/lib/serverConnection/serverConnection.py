@@ -6,8 +6,8 @@ from lib.serverConnection.queueHandler import QueueHandler
 import os
 
 
-class ServerConnection:
-    def startCommunicating(s, files, sPath, msgQueue, recvMsg, v, q):
+class Connection:
+    def startCommunicating(s, fs, sPath, queue, recvMsg, v, q):
         try:
             while True:
                 data, addr = s.recvfrom(Constants.bytesChunk())
@@ -15,26 +15,26 @@ class ServerConnection:
                 msg = data.decode()
                 queuedMessage = msg + '-' + addr[0] + '-' + str(addr[1])
                 recvMsg[queuedMessage] = True
-                ServerConnection.process(s, files, msg, addr, sPath, msgQueue, v, q)
+                Connection.process(s, fs, msg, addr, sPath, queue, v, q)
             return
         except Exception:
             return
 
-    def process(s, files, msg, addr, sPath, msgQueue, v, q):
+    def process(s, f, msg, addr, pth, queue, v, q):
         mode = msg[0]
         data = msg[1:]
         if mode == Constants.uploadProtocol():
-            ServerConnection.startUpload(s, files, data, addr, sPath, msgQueue, v, q)
+            Connection.startUpload(s, f, data, addr, pth, queue, v, q)
         elif mode == Constants.downloadProtocol():
-            ServerConnection.startDownload(s, files, data, addr, sPath, msgQueue, v, q)
+            Connection.startDownload(s, f, data, addr, pth, queue, v, q)
         elif mode == Constants.errorProtocol():
-            ServerConnection.processError(s, files, data, addr, v, q)
+            Connection.processError(s, f, data, addr, v, q)
         elif mode == Constants.endProtocol():
-            ServerConnection.processEnd(s, files, data, addr, v, q)
+            Connection.processEnd(s, f, data, addr, v, q)
         elif mode == Constants.ackProtocol():
-            ServerConnection.processAck(s, files, data, addr, msgQueue, v, q)
+            Connection.processAck(s, f, data, addr, queue, v, q)
         elif mode == Constants.fileTransferProtocol():
-            ServerConnection.processTransfer(s, files, data, addr, msgQueue, v, q)
+            Connection.processTransfer(s, f, data, addr, queue, v, q)
         return
 
     def startUpload(s, files, message, addr, sPath, msgQueue, verbose, quiet):
@@ -58,20 +58,20 @@ class ServerConnection:
         msg = processedData[separatorPossition+1:]
         try:
             f = files[fname]
-            ServerConnection.upload(s, f, fname, bytesRecv, msg, addr, v, q)
+            Connection.upload(s, f, fname, bytesRecv, msg, addr, v, q)
         except Exception:
             msg = CommonConnection.sendError(s, fname, addr[0], addr[1])
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
         return
 
-    def startDownload(s, files, filename, addr, sPath, msgQueue, verbose, quiet):
+    def startDownload(s, files, filename, addr, sPath, msgQueue, v, q):
         try:
             file = open(sPath+filename, "rb")
             files[filename] = file
             data = file.read(Constants.getMaxReadSize())
-            host = addr[0]
-            port = addr[1]
-            msg = CommonConnection.sendMessage(s, host, port, filename, data, 0)
+            h = addr[0]
+            p = addr[1]
+            msg = CommonConnection.sendMessage(s, h, p, filename, data, 0)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
         except Exception:
             Logger.logIfNotQuiet("Error opening file " + filename)
@@ -80,7 +80,7 @@ class ServerConnection:
             return
         return
 
-    def processError(s, files, filename, addr, verbose, quiet):
+    def processError(s, files, filename, addr, v, q):
         try:
             files[filename].close()
             CommonConnection.sendACK(s, addr[0], addr[1], 'F', filename, 0)
@@ -88,7 +88,7 @@ class ServerConnection:
             return
         return
 
-    def processEnd(s, files, filename, addr, verbose, quiet):
+    def processEnd(s, files, filename, addr, v, q):
         try:
             files[filename].close()
             CommonConnection.sendACK(s, addr[0], addr[1], 'E', filename, 0)
@@ -96,17 +96,17 @@ class ServerConnection:
             return
         return
 
-    def processAck(s, files, data, addr, msgQueue, v, q):
-        mode = data[0]
+    def processAck(s, files, data, addr, queue, v, q):
+        md = data[0]
         processedData = data[1:]
-        if mode == Constants.endProtocol() or mode == Constants.errorProtocol():
+        if md == Constants.endProtocol() or md == Constants.errorProtocol():
             return
-        elif mode == Constants.fileTransferProtocol():
+        elif md == Constants.fileTransferProtocol():
             separatorPossition = processedData.find(';')
             fname = processedData[0:separatorPossition]
             bRecv = int(processedData[separatorPossition+1:])
             f = files[fname]
-            return ServerConnection.download(s, f, fname, bRecv, addr, msgQueue, v, q)
+            return Connection.download(s, f, fname, bRecv, addr, queue, v, q)
         return
 
     def download(s, f, fname, br, addr, msgQueue, v, q):
@@ -116,7 +116,9 @@ class ServerConnection:
             msg = CommonConnection.sendEndFile(s, addr[0], addr[1], fname, 0)
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
         else:
-            msg = CommonConnection.sendMessage(s, addr[0], addr[1], fname, data, br)
+            h = addr[0]
+            port = addr[1]
+            msg = CommonConnection.sendMessage(s, h, port, fname, data, br)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
         return
 

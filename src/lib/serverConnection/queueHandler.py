@@ -1,6 +1,7 @@
 import datetime
 import time
 
+
 class QueueHandler:
     def handleQueue(srvSock, msgQueue, recvMsg, v):
         while True:
@@ -22,10 +23,10 @@ class QueueHandler:
                 QueueHandler.retry(srvSock, item, msgQueue, v)
             msgQueue.task_done()
         return
-    
+
     def makeSimpleExpected(currentMsg, addr):
         print('makeSimpleExpected')
-        expected = 'A' + currentMsg + ';0'+ '-' + addr[0] + '-' + str(addr[1])
+        expected = 'A' + currentMsg + ';0' + '-' + addr[0] + '-' + str(addr[1])
         ttl = datetime.datetime.now() + datetime.timedelta(seconds=2)
         d = dict()
         d['expected'] = expected
@@ -33,18 +34,17 @@ class QueueHandler:
         d['msg'] = currentMsg
         d['addr'] = addr
         return d
-    
+
     def makeMessageExpected(currentMsg, addr):
         separatorPossition = currentMsg.find(';')
         fname = currentMsg[0:separatorPossition]
         processedData = currentMsg[separatorPossition+1:]
-
         separatorPossition = processedData.find(';')
         bytesRecv = int(processedData[0:separatorPossition])
         msg = processedData[separatorPossition+1:]
 
         totalLenght = bytesRecv + len(msg)
-        processedMsg = fname + ';'+ str(totalLenght)
+        processedMsg = fname + ';' + str(totalLenght)
         expected = 'A' + processedMsg + '-' + addr[0] + '-' + str(addr[1])
         ttl = datetime.datetime.now() + datetime.timedelta(seconds=2)
         d = dict()
@@ -53,7 +53,7 @@ class QueueHandler:
         d['msg'] = currentMsg
         d['addr'] = addr
         return d
-    
+
     def retry(srvSock, item, msgQueue, v):
         addr = item['addr']
         message = item['msg']
