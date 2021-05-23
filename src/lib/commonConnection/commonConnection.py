@@ -14,12 +14,12 @@ class CommonConnection:
 
     def sendError(socket, filename, host, port):
         addr = (host, port)
+        msg = 'F'+filename
         try:
-            msg = 'F'+filename
             socket.sendto(msg.encode(), addr)
         except socket.error:
             return
-        return
+        return msg
 
     def sendEndFile(socket, host, port, filename, bytesAlreadyReceived):
         addr = (host, port)
@@ -28,7 +28,7 @@ class CommonConnection:
             socket.sendto(message.encode(), addr)
         except socket.error:
             return
-        return
+        return message
 
     def sendMessage(socket, host, port, filename, message, bytesReceived):
         addr = (host, port)
@@ -40,4 +40,4 @@ class CommonConnection:
         except socket.error:
             print('ERRORSOCKET')
             return
-        return
+        return data.decode()

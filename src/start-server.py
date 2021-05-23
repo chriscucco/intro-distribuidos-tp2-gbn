@@ -1,8 +1,10 @@
 from lib.params.serverParamsValidation import ServerParams
 from lib.serverConnection.serverConnection import ServerConnection
+from lib.serverConnection.queueHandler import QueueHandler
 from lib.logger.logger import Logger
 from threading import Thread
 import socket
+import queue
 
 
 def main():
@@ -24,17 +26,24 @@ def main():
         return
 
     files = {}
-    t = Thread(target=start, args=(srvSock, files, sPath, verbose, quiet))
-    t.start()
 
+    msgQueue = queue.Queue()
+    recvMsg = {}
+    queueThread = Thread(target=runQueue, args=(srvSock, msgQueue, recvMsg, verbose))
+    t = Thread(target=start, args=(srvSock, files, sPath, msgQueue, recvMsg, verbose, quiet))
+    t.start()
+    queueThread.start()
     serverOn = True
     while serverOn:
         value = input()
         if value == 'exit':
             serverOn = False
 
+    enabled = False
+    msgQueue.put('exit')
     srvSock.close()
     t.join()
+    queueThread.join()
     for key, f in files.items():
         try:
             f.close
@@ -45,8 +54,12 @@ def main():
     return
 
 
-def start(socket, files, sPath, verbose, quiet):
-    ServerConnection.startCommunicating(socket, files, sPath, verbose, quiet)
+def start(socket, files, sPath, msgQueue, recvMsg, verbose, quiet):
+    ServerConnection.startCommunicating(socket, files, sPath, msgQueue, recvMsg, verbose, quiet)
+    return
+
+def runQueue(srvSock, msgQueue, recvMsg, v):
+    QueueHandler.handleQueue(srvSock, msgQueue, recvMsg, v)
     return
 
 
