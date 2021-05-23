@@ -11,7 +11,6 @@ class Connection:
         try:
             while True:
                 data, addr = s.recvfrom(Constants.bytesChunk())
-                print('received message')
                 msg = data.decode()
                 queuedMessage = msg + '-' + addr[0] + '-' + str(addr[1])
                 recvMsg[queuedMessage] = True

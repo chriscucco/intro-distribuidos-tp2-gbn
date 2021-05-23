@@ -38,6 +38,5 @@ class CommonConnection:
         try:
             socket.sendto(data, addr)
         except socket.error:
-            print('ERRORSOCKET')
             return
         return data.decode()

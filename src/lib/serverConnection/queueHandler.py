@@ -10,8 +10,6 @@ class QueueHandler:
                 break
             now = datetime.datetime.now()
             sleepTime = (item["ttl"] - now).total_seconds()
-            print("TIME")
-            print(item["ttl"])
             if sleepTime > 0:
                 time.sleep(int(sleepTime)+1)
 
