@@ -81,7 +81,7 @@ class Connection:
             msg = CommonConnection.sendMessage(s, h, p, filename, data, 0)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
         except Exception:
-            Logger.logIfNotQuiet("Error opening file " + filename)
+            Logger.logIfNotQuiet(q, "Error opening file " + filename)
             msg = CommonConnection.sendError(s, filename, addr[0], addr[1])
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
             return
