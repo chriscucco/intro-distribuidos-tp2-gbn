@@ -52,7 +52,7 @@ class ClientDownload:
                           addr, verb, quiet):
         if mode == Constants.errorProtocol():
             Logger.log("The file does not exist on the server")
-            Logger.logIfVerbose(verb, "Sending ACK-F to server: " + addr)
+            Logger.logIfVerbose(verb, "Sending ACK-F to server: " + str(addr))
             CommonConnection.sendACK(downSock, addr[0], addr[1], 'F', fName, 0)
             return None
         elif mode == Constants.fileTransferProtocol():
