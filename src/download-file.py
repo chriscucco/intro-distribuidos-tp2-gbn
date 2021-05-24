@@ -12,13 +12,6 @@ def main():
     downSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     Logger.logIfVerbose(verb, "Download-client socket successfully created")
 
-    try:
-        #downSock.bind((host, port))
-        Logger.logIfVerbose(verb, "Server socket binded")
-    except socket.error:
-        Logger.log("Error binding socket")
-        return
-
     clientDownload = ClientDownload()
     clientDownload.download(downSock, host, port, fName, fDest, verb, quiet)
 

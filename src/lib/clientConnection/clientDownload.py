@@ -14,7 +14,8 @@ class ClientDownload:
         data, addr = downSock.recvfrom(Constants.bytesChunk())
         dataDecode = data.decode()
         mode = dataDecode[0]
-        file = self.processInitialMsg(downSock, fName, fDest, mode, dataDecode, addr, verb, quiet)
+        file = self.processInitialMsg(downSock, fName, fDest, mode,
+                                      addr, verb, quiet)
         if file is None:
             return
 
@@ -26,14 +27,18 @@ class ClientDownload:
                 separatorIndex = processedData.find(';')
                 bRecv = int(processedData[:separatorIndex])
                 msg = processedData[separatorIndex+1:]
-                Logger.logIfVerbose(verb, "Recieved " + str(bRecv) + " bytes from server: " + str(addr))
+                Logger.logIfVerbose(verb, "Recieved " + str(bRecv) +
+                                    " bytes from server: " + str(addr))
                 file.seek(bRecv, os.SEEK_SET)
                 file.write(msg.encode())
                 fileSize = FileHelper.getFileSize(file)
-                Logger.logIfVerbose(verb, "Sending ACK-T to server: " + str(addr))
-                CommonConnection.sendACK(downSock, host, port, 'T', fname, fileSize)
+                Logger.logIfVerbose(verb, "Sending ACK-T to server: "
+                                    + str(addr))
+                CommonConnection.sendACK(downSock, host, port, 'T',
+                                         fname, fileSize)
             elif mode == Constants.endProtocol():
-                Logger.logIfVerbose(verb, "Sending ACK-E to server: " + str(addr))
+                Logger.logIfVerbose(verb, "Sending ACK-E to server: "
+                                    + str(addr))
                 CommonConnection.sendACK(downSock, host, port, 'E', fname, 0)
                 Logger.log("File downloaded successfully in: " + fDest + fname)
                 file.close()
@@ -43,7 +48,8 @@ class ClientDownload:
             mode = dataDecode[0]
         return
 
-    def processInitialMsg(self, downSock, fName, fDest, mode, data, addr, verb, quiet):
+    def processInitialMsg(self, downSock, fName, fDest, mode,
+                          addr, verb, quiet):
         if mode == Constants.errorProtocol():
             Logger.log("The file does not exist on the server")
             Logger.logIfVerbose(verb, "Sending ACK-F to server: " + addr)
@@ -55,5 +61,6 @@ class ClientDownload:
                 Logger.logIfVerbose(verb, "File created on client")
                 return file
             except OSError:
-                Logger.log("Client could not create the file on: " + fDest + fName)
+                Logger.log("Client could not create the file on: "
+                           + fDest + fName)
                 return None
