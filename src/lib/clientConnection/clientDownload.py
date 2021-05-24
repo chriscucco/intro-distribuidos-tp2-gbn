@@ -12,7 +12,11 @@ class ClientDownload:
         downSock.sendto(message.encode(), (host, port))
 
         data, addr = downSock.recvfrom(Constants.bytesChunk())
-        dataDecode = data.decode()
+        try:
+            dataDecode = data.decode()
+        except UnicodeDecodeError as e:
+            Logger.logIfVerbose(verb, "Failed to decode the initial message")
+            return
         mode = dataDecode[0]
         file = self.processInitialMsg(downSock, fName, fDest, mode,
                                       addr, verb, quiet)
