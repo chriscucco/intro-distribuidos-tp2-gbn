@@ -26,6 +26,7 @@ def main():
 
     # Se cierra cliente
     sckt.close()
+    Logger.logIfNotQuiet(quiet, "Client closed")
     return
 
 

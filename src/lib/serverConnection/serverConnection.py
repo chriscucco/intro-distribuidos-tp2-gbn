@@ -41,7 +41,6 @@ class Connection:
     def startUpload(s, files, message, addr, sPath, msgQueue, verbose, quiet):
         try:
             file = open(sPath+message, "wb")
-            print("direccion creacion archivo ", sPath+message)
             Logger.logIfVerbose(verbose, "File " + message + " opened")
             files[message] = file
             Logger.logIfVerbose(verbose, "Sending ACK to client: " + str(addr))
