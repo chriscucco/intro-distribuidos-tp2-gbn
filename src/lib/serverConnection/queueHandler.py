@@ -56,7 +56,7 @@ class QueueHandler:
     def retry(srvSock, item, msgQueue, v):
         addr = item['addr']
         message = item['msg']
-        Logger.logIfVerbose(v, "Retrying package to client: " + addr)
+        Logger.logIfVerbose(v, "Retrying package to client: " + str(addr))
         srvSock.sendto(message.encode(), addr)
         item['ttl'] = datetime.datetime.now() + datetime.timedelta(seconds=2)
         msgQueue.put(item)

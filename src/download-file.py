@@ -1,5 +1,7 @@
 from lib.params.downloadClientParamsValidation import DownloadClientParams
 from lib.logger.logger import Logger
+from lib.clientConnection.clientDownload import ClientDownload
+import socket
 
 
 def main():
@@ -7,7 +9,21 @@ def main():
     if h:
         return printHelp()
 
-    Logger.log("Not implemented")
+    downSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    Logger.logIfVerbose(verb, "Download-client socket successfully created")
+
+    try:
+        #downSock.bind((host, port))
+        Logger.logIfVerbose(verb, "Server socket binded")
+    except socket.error:
+        Logger.log("Error binding socket")
+        return
+
+    clientDownload = ClientDownload()
+    clientDownload.download(downSock, host, port, fName, fDest, verb, quiet)
+
+    downSock.close()
+    Logger.log("Client closed")
     return
 
 
