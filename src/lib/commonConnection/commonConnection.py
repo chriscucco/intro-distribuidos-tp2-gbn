@@ -34,7 +34,7 @@ class CommonConnection:
         addr = (host, port)
         data = Constants.fileTransferProtocol() + filename + ";"
         data += str(bytesReceived) + ";"
-        sizeToComplete = 44 - len(data)
+        sizeToComplete = Constants.maxHeaderTransProtocolSize() - len(data)
         if sizeToComplete < 0:
             raise ValueError
         while sizeToComplete > 0:
