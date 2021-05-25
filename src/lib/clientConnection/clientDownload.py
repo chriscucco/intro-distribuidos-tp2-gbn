@@ -12,35 +12,33 @@ class ClientDownload:
         downSock.sendto(message.encode(), (host, port))
 
         data, addr = downSock.recvfrom(Constants.bytesChunk())
-        try:
-            dataDecode = data.decode()
-        except UnicodeDecodeError as e:
-            Logger.logIfVerbose(verb, "Failed to decode the initial message")
-            return
-        mode = dataDecode[0]
-        file = self.processInitialMsg(downSock, fName, fDest, mode,
+        
+        mode = data[0:1]
+        processedData = data[1:]
+        file = self.processInitialMsg(downSock, fName, fDest, mode.decode(),
                                       addr, verb, quiet)
         if file is None:
             return
 
         while True:
-            if mode == Constants.fileTransferProtocol():
-                separatorIndex = dataDecode.find(';')
-                fname = dataDecode[1:separatorIndex]
-                processedData = dataDecode[separatorIndex+1:]
-                separatorIndex = processedData.find(';')
-                bRecv = int(processedData[:separatorIndex])
-                msg = processedData[separatorIndex+1:]
+            if mode.decode() == Constants.fileTransferProtocol():
+                values = processedData[0:43].decode()
+                msg = processedData[43:]
+                separatorPossition = values.find(';')
+                fname = values[0:separatorPossition]
+                processedData = values[separatorPossition+1:]
+                separatorPossition = processedData.find(';')
+                bRecv = int(processedData[0:separatorPossition])
                 Logger.logIfVerbose(verb, "Recieved " + str(bRecv) +
                                     " bytes from server: " + str(addr))
                 file.seek(bRecv, os.SEEK_SET)
-                file.write(msg.encode())
+                file.write(msg)
                 fileSize = FileHelper.getFileSize(file)
                 Logger.logIfVerbose(verb, "Sending ACK-T to server: "
                                     + str(addr))
                 CommonConnection.sendACK(downSock, host, port, 'T',
                                          fname, fileSize)
-            elif mode == Constants.endProtocol():
+            elif mode.decode() == Constants.endProtocol():
                 Logger.logIfVerbose(verb, "Sending ACK-E to server: "
                                     + str(addr))
                 CommonConnection.sendACK(downSock, host, port, 'E', fname, 0)
@@ -48,8 +46,8 @@ class ClientDownload:
                 file.close()
                 return
             data, addr = downSock.recvfrom(Constants.bytesChunk())
-            dataDecode = data.decode()
-            mode = dataDecode[0]
+            mode = data[0:1]
+            processedData = data[1:]
         return
 
     def processInitialMsg(self, downSock, fName, fDest, mode,
