@@ -12,7 +12,6 @@ class ClientDownload:
         downSock.sendto(message.encode(), (host, port))
 
         data, addr = downSock.recvfrom(Constants.bytesChunk())
-        
         mode = data[0:1]
         processedData = data[1:]
         file = self.processInitialMsg(downSock, fName, fDest, mode.decode(),

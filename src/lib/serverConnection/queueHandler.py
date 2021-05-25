@@ -29,7 +29,8 @@ class QueueHandler:
     def makeSimpleExpected(currentMsg, addr):
         decodedMsg = currentMsg.decode()
         expected = 'A' + decodedMsg + ';0' + '-' + addr[0] + '-' + str(addr[1])
-        ttl = datetime.datetime.now() + datetime.timedelta(seconds=Constants.ttl())
+        secs = Constants.ttl()
+        ttl = datetime.datetime.now() + datetime.timedelta(seconds=secs)
         d = dict()
         d['expected'] = expected
         d['ttl'] = ttl

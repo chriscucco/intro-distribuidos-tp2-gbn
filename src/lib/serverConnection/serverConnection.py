@@ -15,8 +15,8 @@ class Connection:
                 mode = data[0:1]
                 if mode.decode() == 'A':
                     msg = data.decode()
-                    queuedMessage = msg + '-' + str(addr[0]) + '-' + str(addr[1])
-                    recvMsg[queuedMessage] = True
+                    qMsg = msg + '-' + str(addr[0]) + '-' + str(addr[1])
+                    recvMsg[qMsg] = True
                 Connection.process(s, fs, data, addr, sPath, queue, v, q)
             return
         except Exception as e:
