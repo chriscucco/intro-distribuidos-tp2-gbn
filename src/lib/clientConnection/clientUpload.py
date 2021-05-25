@@ -63,7 +63,7 @@ class ClientUpload:
         message = Constants.uploadProtocol() + fName
         addr = (host, port)
         sckt.sendto(message.encode(), addr)
-        msgQueue.put(QueueHandler.makeSimpleExpected(message, addr))
+        msgQueue.put(QueueHandler.makeSimpleExpected(message.encode(), addr))
 
         message = CommonConnection.receiveMessageFromServer(sckt, addr,
                                                             recvMsg)
