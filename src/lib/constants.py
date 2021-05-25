@@ -2,6 +2,7 @@
 DATA_CHUNK = 1024
 MAX_READ_SIZE = 980
 TTL = 2
+MAX_HEADER_TRANS_PROTOCOL_SIZE = 44
 DOWNLOAD = "D"
 UPLOAD = "U"
 TRANSFER = "T"
@@ -38,3 +39,6 @@ class Constants:
 
     def ttl():
         return TTL
+
+    def maxHeaderTransProtocolSize():
+        return MAX_HEADER_TRANS_PROTOCOL_SIZE

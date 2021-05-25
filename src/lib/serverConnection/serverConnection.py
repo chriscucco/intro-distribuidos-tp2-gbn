@@ -56,13 +56,13 @@ class Connection:
         return
 
     def processTransfer(s, files, data, addr, msgQueue, v, q):
-        values = data[0:43].decode()
+        values = data[0: Constants.maxHeaderTransProtocolSize() - 1].decode()
         separatorPossition = values.find(';')
         fname = values[0:separatorPossition]
         processedData = values[separatorPossition+1:]
         separatorPossition = processedData.find(';')
         bytesRecv = int(processedData[0:separatorPossition])
-        msg = data[43:]
+        msg = data[Constants.maxHeaderTransProtocolSize() - 1:]
         try:
             f = files[fname]
             Connection.upload(s, f, fname, bytesRecv, msg, addr, v, q)
