@@ -66,5 +66,7 @@ class QueueHandler:
         srvSock.sendto(message, addr)
         item['ttl'] = datetime.datetime.now() + datetime.timedelta(
             seconds=Constants.ttl())
-        msgQueue.put(item)
+        mode = message[0:1].decode()
+        if mode == 'T' or mode == 'D' or mode == 'U':
+            msgQueue.put(item)
         return

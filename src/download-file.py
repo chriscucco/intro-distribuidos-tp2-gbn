@@ -1,7 +1,10 @@
 from lib.params.downloadClientParamsValidation import DownloadClientParams
 from lib.logger.logger import Logger
 from lib.clientConnection.clientDownload import ClientDownload
+from lib.serverConnection.queueHandler import QueueHandler
 import socket
+import queue
+from threading import Thread
 
 
 def main():
@@ -12,10 +15,18 @@ def main():
     downSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     Logger.logIfVerbose(verb, "Download-client socket successfully created")
 
-    clientDownload = ClientDownload()
-    clientDownload.download(downSock, host, port, fName, fDest, verb, quiet)
+    msgQueue = queue.Queue()
+    recvMsg = {}
+    queueThread = Thread(target=runQueue, args=(downSock, msgQueue, recvMsg, verb))
+    queueThread.start()
 
+    clientDownload = ClientDownload()
+    clientDownload.download(downSock, host, port, fName, fDest, msgQueue, recvMsg, verb, quiet)
+ 
+    # Se cierra cliente
+    msgQueue.put('exit')
     downSock.close()
+    queueThread.join()
     Logger.log("Client closed")
     return
 
@@ -34,6 +45,11 @@ def printHelp():
     print('-p, --port       service port')
     print('-d, --dst        destination file path')
     print('-n, --name       file name')
+
+
+def runQueue(skt, msgQueue, recvMsg, v):
+    QueueHandler.handleQueue(skt, msgQueue, recvMsg, v)
+    return
 
 
 if __name__ == "__main__":

@@ -3,15 +3,19 @@ from lib.constants import Constants
 from lib.commonConnection.commonConnection import CommonConnection
 from lib.helpers.fileHelper import FileHelper
 from lib.logger.logger import Logger
+from lib.serverConnection.queueHandler import QueueHandler
 
 
 class ClientDownload:
-    def download(self, downSock, host, port, fName, fDest, verb, quiet):
+    def download(self, downSock, host, port, fName, fDest, msgQueue, recvMsg, verb, quiet):
         message = Constants.downloadProtocol() + fName
         Logger.logIfVerbose(verb, "Sending download request to server")
-        downSock.sendto(message.encode(), (host, port))
-
+        addr = (host, port)
+        downSock.sendto(message.encode(), addr)
+        expected = QueueHandler.makeSimpleExpected(message.encode(), addr)
+        msgQueue.put(expected)
         data, addr = downSock.recvfrom(Constants.bytesChunk())
+        recvMsg[expected['expected']] = True
         mode = data[0:1]
         processedData = data[1:]
         file = self.processInitialMsg(downSock, fName, fDest, mode.decode(),
