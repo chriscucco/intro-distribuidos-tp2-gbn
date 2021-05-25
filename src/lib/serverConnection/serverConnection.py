@@ -14,6 +14,7 @@ class Connection:
                 Logger.logIfVerbose(v, "Recieved message from: " + str(addr))
                 msg = data.decode()
                 queuedMessage = msg + '-' + str(addr[0]) + '-' + str(addr[1])
+                print(queuedMessage)
                 recvMsg[queuedMessage] = True
                 Connection.process(s, fs, msg, addr, sPath, queue, v, q)
             return

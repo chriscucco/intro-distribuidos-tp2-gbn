@@ -1,7 +1,10 @@
 import socket
+import queue
+from threading import Thread
 from lib.params.uploadClientParamsValidation import UploadClientParams
 from lib.logger.logger import Logger
 from lib.clientConnection.clientUpload import ClientUpload
+from lib.serverConnection.queueHandler import QueueHandler
 
 
 def main():
@@ -20,12 +23,20 @@ def main():
     sckt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     Logger.logIfVerbose(verb, "Creating socket...")
 
+    msgQueue = queue.Queue()
+    recvMsg = {}
+    queueThread = Thread(target=runQueue, args=(sckt, msgQueue, recvMsg, verb))
+    queueThread.start()
+
     clientUpload = ClientUpload()
 
-    clientUpload.upload(sckt, host, port, file, fName, verb, quiet)
+    clientUpload.upload(sckt, host, port, file, fName, msgQueue, recvMsg,
+                        verb, quiet)
 
     # Se cierra cliente
+    msgQueue.put('exit')
     sckt.close()
+    queueThread.join()
     Logger.logIfNotQuiet(quiet, "Client closed")
     return
 
@@ -44,6 +55,11 @@ def printHelp():
     print('-p, --port       server port')
     print('-s, --src        source file path')
     print('-n, --name       file name')
+
+
+def runQueue(skt, msgQueue, recvMsg, v):
+    QueueHandler.handleQueue(skt, msgQueue, recvMsg, v)
+    return
 
 
 if __name__ == "__main__":

@@ -40,3 +40,9 @@ class CommonConnection:
         except socket.error:
             return
         return data.decode()
+
+    def receiveMessageFromServer(socket, addr, recvsMsg):
+        data, addr = socket.recvfrom(Constants.bytesChunk())
+        message = data.decode()
+        recvsMsg[message + '-' + str(addr[0]) + '-' + str(addr[1])] = True
+        return message

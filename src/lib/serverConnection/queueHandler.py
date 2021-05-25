@@ -1,6 +1,7 @@
 import datetime
 import time
 from lib.logger.logger import Logger
+from lib.constants import Constants
 
 
 class QueueHandler:
@@ -17,6 +18,7 @@ class QueueHandler:
 
             expectedMsg = item['expected']
             messageRecv = recvMsg.get(expectedMsg, False)
+
             if messageRecv:
                 recvMsg.pop(expectedMsg)
             else:
@@ -26,7 +28,7 @@ class QueueHandler:
 
     def makeSimpleExpected(currentMsg, addr):
         expected = 'A' + currentMsg + ';0' + '-' + addr[0] + '-' + str(addr[1])
-        ttl = datetime.datetime.now() + datetime.timedelta(seconds=2)
+        ttl = datetime.datetime.now() + datetime.timedelta(seconds=Constants.ttl())
         d = dict()
         d['expected'] = expected
         d['ttl'] = ttl
@@ -45,7 +47,8 @@ class QueueHandler:
         totalLenght = bytesRecv + len(msg)
         processedMsg = fname + ';' + str(totalLenght)
         expected = 'A' + processedMsg + '-' + addr[0] + '-' + str(addr[1])
-        ttl = datetime.datetime.now() + datetime.timedelta(seconds=2)
+        ttl = datetime.datetime.now() + datetime.timedelta(
+            seconds=Constants.ttl())
         d = dict()
         d['expected'] = expected
         d['ttl'] = ttl
@@ -56,8 +59,9 @@ class QueueHandler:
     def retry(srvSock, item, msgQueue, v):
         addr = item['addr']
         message = item['msg']
-        Logger.logIfVerbose(v, "Retrying package to client: " + str(addr))
+        Logger.logIfVerbose(v, "Retrying package to: " + str(addr))
         srvSock.sendto(message.encode(), addr)
-        item['ttl'] = datetime.datetime.now() + datetime.timedelta(seconds=2)
+        item['ttl'] = datetime.datetime.now() + datetime.timedelta(
+            seconds=Constants.ttl())
         msgQueue.put(item)
         return

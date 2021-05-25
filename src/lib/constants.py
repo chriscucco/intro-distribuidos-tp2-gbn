@@ -1,6 +1,7 @@
 
 DATA_CHUNK = 1024
 MAX_READ_SIZE = 950
+TTL = 2
 DOWNLOAD = "D"
 UPLOAD = "U"
 TRANSFER = "T"
@@ -34,3 +35,6 @@ class Constants:
 
     def endProtocol():
         return END
+
+    def ttl():
+        return TTL
