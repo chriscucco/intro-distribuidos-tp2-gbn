@@ -8,24 +8,23 @@ from threading import Thread
 
 
 def main():
-    host, port, fName, fDest, verb, quiet, h = DownloadClientParams.validate()
+    host, port, fName, fDest, v, q, h = DownloadClientParams.validate()
     if h:
         return printHelp()
 
-    downSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    Logger.logIfVerbose(verb, "Download-client socket successfully created")
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    Logger.logIfVerbose(v, "Download-client socket successfully created")
 
-    msgQueue = queue.Queue()
+    msgQ = queue.Queue()
     recvMsg = {}
-    queueThread = Thread(target=runQueue, args=(downSock, msgQueue, recvMsg, verb))
+    queueThread = Thread(target=runQueue, args=(s, msgQ, recvMsg, v))
     queueThread.start()
 
     clientDownload = ClientDownload()
-    clientDownload.download(downSock, host, port, fName, fDest, msgQueue, recvMsg, verb, quiet)
- 
+    clientDownload.download(s, host, port, fName, fDest, msgQ, recvMsg, v, q)
     # Se cierra cliente
-    msgQueue.put('exit')
-    downSock.close()
+    msgQ.put('exit')
+    s.close()
     queueThread.join()
     Logger.log("Client closed")
     return
