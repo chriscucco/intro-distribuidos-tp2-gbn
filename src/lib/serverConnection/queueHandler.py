@@ -27,7 +27,8 @@ class QueueHandler:
         return
 
     def makeSimpleExpected(currentMsg, addr):
-        expected = 'A' + currentMsg + ';0' + '-' + addr[0] + '-' + str(addr[1])
+        decodedMsg = currentMsg.decode()
+        expected = 'A' + decodedMsg + ';0' + '-' + addr[0] + '-' + str(addr[1])
         ttl = datetime.datetime.now() + datetime.timedelta(seconds=Constants.ttl())
         d = dict()
         d['expected'] = expected
@@ -37,14 +38,15 @@ class QueueHandler:
         return d
 
     def makeMessageExpected(currentMsg, addr):
-        separatorPossition = currentMsg.find(';')
-        fname = currentMsg[0:separatorPossition]
-        processedData = currentMsg[separatorPossition+1:]
+        prefix = currentMsg[0:44].decode()
+        fileData = currentMsg[44:]
+        separatorPossition = prefix.find(';')
+        fname = prefix[0:separatorPossition]
+        processedData = prefix[separatorPossition+1:]
         separatorPossition = processedData.find(';')
         bytesRecv = int(processedData[0:separatorPossition])
-        msg = processedData[separatorPossition+1:]
 
-        totalLenght = bytesRecv + len(msg)
+        totalLenght = bytesRecv + len(fileData)
         processedMsg = fname + ';' + str(totalLenght)
         expected = 'A' + processedMsg + '-' + addr[0] + '-' + str(addr[1])
         ttl = datetime.datetime.now() + datetime.timedelta(
@@ -60,7 +62,7 @@ class QueueHandler:
         addr = item['addr']
         message = item['msg']
         Logger.logIfVerbose(v, "Retrying package to: " + str(addr))
-        srvSock.sendto(message.encode(), addr)
+        srvSock.sendto(message, addr)
         item['ttl'] = datetime.datetime.now() + datetime.timedelta(
             seconds=Constants.ttl())
         msgQueue.put(item)

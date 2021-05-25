@@ -12,18 +12,19 @@ class Connection:
             while True:
                 data, addr = s.recvfrom(Constants.bytesChunk())
                 Logger.logIfVerbose(v, "Recieved message from: " + str(addr))
-                msg = data.decode()
-                queuedMessage = msg + '-' + str(addr[0]) + '-' + str(addr[1])
-                print(queuedMessage)
-                recvMsg[queuedMessage] = True
-                Connection.process(s, fs, msg, addr, sPath, queue, v, q)
+                mode = data[0:1]
+                if mode.decode() == 'A':
+                    msg = data.decode()
+                    queuedMessage = msg + '-' + str(addr[0]) + '-' + str(addr[1])
+                    recvMsg[queuedMessage] = True
+                Connection.process(s, fs, data, addr, sPath, queue, v, q)
             return
         except Exception as e:
             print(e)
             return
 
     def process(s, f, msg, addr, pth, queue, v, q):
-        mode = msg[0]
+        mode = msg[0:1].decode()
         data = msg[1:]
         if mode == Constants.uploadProtocol():
             Connection.startUpload(s, f, data, addr, pth, queue, v, q)
@@ -39,7 +40,8 @@ class Connection:
             Connection.processTransfer(s, f, data, addr, queue, v, q)
         return
 
-    def startUpload(s, files, message, addr, sPath, msgQueue, verbose, quiet):
+    def startUpload(s, files, msg, addr, sPath, msgQueue, verbose, quiet):
+        message = msg.decode()
         try:
             file = open(sPath+message, "wb")
             Logger.logIfVerbose(verbose, "File " + message + " opened")
@@ -54,12 +56,13 @@ class Connection:
         return
 
     def processTransfer(s, files, data, addr, msgQueue, v, q):
-        separatorPossition = data.find(';')
-        fname = data[0:separatorPossition]
-        processedData = data[separatorPossition+1:]
+        values = data[0:43].decode()
+        separatorPossition = values.find(';')
+        fname = values[0:separatorPossition]
+        processedData = values[separatorPossition+1:]
         separatorPossition = processedData.find(';')
         bytesRecv = int(processedData[0:separatorPossition])
-        msg = processedData[separatorPossition+1:]
+        msg = data[43:]
         try:
             f = files[fname]
             Connection.upload(s, f, fname, bytesRecv, msg, addr, v, q)
@@ -70,7 +73,8 @@ class Connection:
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
         return
 
-    def startDownload(s, files, filename, addr, sPath, msgQueue, v, q):
+    def startDownload(s, files, data, addr, sPath, msgQueue, v, q):
+        filename = data.decode()
         try:
             file = open(sPath+filename, "rb")
             files[filename] = file
@@ -87,7 +91,8 @@ class Connection:
             return
         return
 
-    def processError(s, files, filename, addr, v, q):
+    def processError(s, files, data, addr, v, q):
+        filename = data.decode()
         try:
             files[filename].close()
             Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
@@ -97,7 +102,8 @@ class Connection:
             return
         return
 
-    def processEnd(s, files, filename, addr, v, q):
+    def processEnd(s, files, data, addr, v, q):
+        filename = data.decode()
         try:
             files[filename].close()
             Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
@@ -107,7 +113,8 @@ class Connection:
             return
         return
 
-    def processAck(s, files, data, addr, queue, v, q):
+    def processAck(s, files, msg, addr, queue, v, q):
+        data = msg.decode()
         md = data[0]
         processedData = data[1:]
         if md == Constants.endProtocol() or md == Constants.errorProtocol():
@@ -139,7 +146,7 @@ class Connection:
     def upload(s, f, fname, bytesRecv, msg, addr, v, q):
         f.seek(bytesRecv, os.SEEK_SET)
         Logger.logIfVerbose(v, "Writing file " + fname)
-        f.write(msg.encode())
+        f.write(msg)
         filesize = FileHelper.getFileSize(f)
         Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
         CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, filesize)
