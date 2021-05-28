@@ -21,4 +21,6 @@ class ServerParams(Params):
             i += 1
         if sPath == '':
             sPath = 'lib/'
+        if sPath[-1] != '/':
+            sPath += '/'
         return sPath

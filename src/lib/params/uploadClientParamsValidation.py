@@ -28,4 +28,6 @@ class UploadClientParams(Params):
             fName = 'test.txt'
         if fSourcePath == '':
             fSourcePath = './'
+        if fSourcePath[-1] != '/':
+            fSourcePath += '/'
         return fName, fSourcePath
