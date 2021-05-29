@@ -13,13 +13,13 @@ class Params():
         return host, port
 
     def validate():
-        host, port, verboseParam, quietParam, helpParam, lr = Params.initialize()
+        host, port, verbose, quietParam, helpParam, lr = Params.initialize()
         i = 0
         while i < len(sys.argv):
             if sys.argv[i] == '-h' or sys.argv[i] == '--help':
                 helpParam = True
             elif sys.argv[i] == '-v' or sys.argv[i] == '--verbose':
-                verboseParam = True
+                verbose = True
             elif sys.argv[i] == '-q' or sys.argv[i] == '--quiet':
                 quietParam = True
             elif sys.argv[i] == '-H' or sys.argv[i] == '--host':
@@ -40,6 +40,6 @@ class Params():
                 i += 1
             i += 1
         host, port = Params.processParams(host, port)
-        if verboseParam:
+        if verbose:
             quietParam = False
-        return host, port, verboseParam, quietParam, helpParam, lr
+        return host, port, verbose, quietParam, helpParam, lr

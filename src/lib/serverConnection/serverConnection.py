@@ -14,7 +14,8 @@ class Connection:
                 r = random.random()
                 data, addr = s.recvfrom(Constants.bytesChunk())
                 if r > lr:
-                    Logger.logIfVerbose(v, "Recieved message from: " + str(addr))
+                    Logger.logIfVerbose(v, "Recieved message from: "
+                                        + str(addr))
                     mode = data[0:1]
                     if mode.decode() == 'A':
                         msg = data.decode()
@@ -132,7 +133,6 @@ class Connection:
 
     def download(s, f, fname, br, addr, msgQueue, v, q):
         f.seek(br, os.SEEK_SET)
-        Logger.logIfVerbose(v, "Reading file " + fname)
         data = f.read(Constants.getMaxReadSize())
         if len(data) == 0:
             Logger.logIfVerbose(v, "Sending EndFile to client: " + str(addr))

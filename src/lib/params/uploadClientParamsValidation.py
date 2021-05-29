@@ -5,10 +5,10 @@ from lib.logger.logger import Logger
 
 class UploadClientParams(Params):
     def validate():
-        host, port, verbose, quiet, helpParam, lossRate = Params.validate()
+        host, port, verbose, quiet, helpParam, lr = Params.validate()
         fName, fSourcePath = UploadClientParams.getSourcePathAndFilename()
         Logger.logIfVerbose(verbose, "Params parsed")
-        return host, port, fName, fSourcePath, verbose, quiet, helpParam, lossRate
+        return host, port, fName, fSourcePath, verbose, quiet, helpParam, lr
 
     def getSourcePathAndFilename():
         fName = ''

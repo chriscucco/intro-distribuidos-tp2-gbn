@@ -28,9 +28,9 @@ def main():
     files = {}
 
     msgQueue = queue.Queue()
-    recvMsg = {}
-    queueThread = Thread(target=runQueue, args=(skt, msgQueue, recvMsg, v))
-    t = Thread(target=run, args=(skt, files, sPath, msgQueue, recvMsg, v, q, lr))
+    rMsg = {}
+    queueThread = Thread(target=runQueue, args=(skt, msgQueue, rMsg, v))
+    t = Thread(target=run, args=(skt, files, sPath, msgQueue, rMsg, v, q, lr))
     t.start()
     queueThread.start()
     serverOn = True

@@ -16,12 +16,12 @@ def main():
     Logger.logIfVerbose(v, "Download-client socket successfully created")
 
     msgQ = queue.Queue()
-    recvMsg = {}
-    queueThread = Thread(target=runQueue, args=(s, msgQ, recvMsg, v))
+    rMsg = {}
+    queueThread = Thread(target=runQueue, args=(s, msgQ, rMsg, v))
     queueThread.start()
 
     clientDownload = ClientDownload()
-    clientDownload.download(s, host, port, fName, fDest, msgQ, recvMsg, v, q, lr)
+    clientDownload.download(s, host, port, fName, fDest, msgQ, rMsg, v, q, lr)
     # Se cierra cliente
     msgQ.put('exit')
     s.close()
