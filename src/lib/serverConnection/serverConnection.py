@@ -13,7 +13,7 @@ class Connection:
             while True:
                 r = random.random()
                 data, addr = s.recvfrom(Constants.bytesChunk())
-                if r > lr:
+                if r >= lr:
                     Logger.logIfVerbose(v, "Recieved message from: "
                                         + str(addr))
                     mode = data[0:1]

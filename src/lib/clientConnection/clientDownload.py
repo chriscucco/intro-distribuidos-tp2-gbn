@@ -26,7 +26,7 @@ class ClientDownload:
 
         while True:
             r = random.random()
-            if r > lr:
+            if r >= lr:
                 if mode.decode() == Constants.fileTransferProtocol():
                     values = processedData[0:43].decode()
                     msg = processedData[43:]

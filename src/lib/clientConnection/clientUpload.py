@@ -18,7 +18,7 @@ class ClientUpload:
         r = random.random()
 
         while True:
-            if r > lr:
+            if r >= lr:
                 file.seek(bytesSent, os.SEEK_SET)
                 data = file.read(Constants.getMaxReadSize())
 
@@ -42,7 +42,7 @@ class ClientUpload:
 
             msgRcvd = CommonConnection.receiveMessageFromServer(s, addr)
             r = random.random()
-            if r > lr:
+            if r >= lr:
                 recvMsg[msgRcvd+'-'+str(addr[0])+'-'+str(addr[1])] = True
                 if msgRcvd[0] == Constants.errorProtocol():
                     Logger.log("Server cant process the file transfer")
