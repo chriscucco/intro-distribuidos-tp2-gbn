@@ -8,7 +8,7 @@ import random
 
 
 class ClientDownload:
-    def download(self, s, host, port, fName, fDest, msgQueue, recvMsg, v, q, lr):
+    def download(self, s, host, port, fName, dest, msgQueue, rMsg, v, q, lr):
         message = Constants.downloadProtocol() + fName
         Logger.logIfVerbose(v, "Sending download request to server")
         addr = (host, port)
@@ -16,10 +16,10 @@ class ClientDownload:
         expected = QueueHandler.makeSimpleExpected(message.encode(), addr)
         msgQueue.put(expected)
         data, addr = s.recvfrom(Constants.bytesChunk())
-        recvMsg[expected['expected']] = True
+        rMsg[expected['expected']] = True
         mode = data[0:1]
         processedData = data[1:]
-        file = self.processInitialMsg(s, fName, fDest, mode.decode(),
+        file = self.processInitialMsg(s, fName, dest, mode.decode(),
                                       addr, v, q)
         if file is None:
             return
@@ -35,16 +35,19 @@ class ClientDownload:
                     processedData = values[separatorPossition+1:]
                     separatorPossition = processedData.find(';')
                     bRecv = int(processedData[0:separatorPossition])
-                    Logger.logIfVerbose(v, "Recieved " + str(bRecv) + " bytes from server: " + str(addr))
+                    Logger.logIfVerbose(v, "Recieved " + str(bRecv) +
+                                        " bytes from server: " + str(addr))
                     file.seek(bRecv, os.SEEK_SET)
                     file.write(msg)
-                    fileSize = FileHelper.getFileSize(file)
-                    Logger.logIfVerbose(v, "Sending ACK-T to server: " + str(addr))
-                    CommonConnection.sendACK(s, host, port, 'T', fname, fileSize)
+                    size = FileHelper.getFileSize(file)
+                    Logger.logIfVerbose(v, "Sending ACK-T to server: "
+                                        + str(addr))
+                    CommonConnection.sendACK(s, host, port, 'T', fname, size)
                 elif mode.decode() == Constants.endProtocol():
-                    Logger.logIfVerbose(v, "Sending ACK-E to server: " + str(addr))
+                    Logger.logIfVerbose(v, "Sending ACK-E to server: "
+                                        + str(addr))
                     CommonConnection.sendACK(s, host, port, 'E', fname, 0)
-                    Logger.log("File downloaded successfully in: " + fDest + fname)
+                    Logger.log("File downloaded successfully in: "+dest+fname)
                     file.close()
                     return
             data, addr = s.recvfrom(Constants.bytesChunk())

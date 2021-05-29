@@ -9,9 +9,7 @@ from lib.exceptions.paramException import ParamException
 
 
 def main():
-
     host, port, fName, fSource, v, q, h, lr = '', '', '', '', '', '', '', ''
-
     try:
         host, port, fName, fSource, v, q, h, lr = UploadClientParams.validate()
     except ParamException as e:
