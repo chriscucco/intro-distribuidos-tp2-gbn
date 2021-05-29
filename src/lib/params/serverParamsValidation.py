@@ -1,7 +1,6 @@
 import sys
 from lib.params.paramsValidation import Params
 from lib.logger.logger import Logger
-from lib.exceptions.paramException import ParamException
 from lib.constants import Constants
 
 
@@ -25,20 +24,14 @@ class ServerParams(Params):
 
         while i < len(sys.argv):
 
-            if (i > 0 and commandWithValue is False
-                    and sys.argv[i] not in SERVER_COMMANDS):
-                raise ParamException(sys.argv[i])
+            Params.validateCommand(SERVER_COMMANDS, commandWithValue, i)
 
             if sys.argv[i] == '-s' or sys.argv[i] == '--storage':
                 if len(sys.argv) > i+1:
                     sPath = sys.argv[i+1]
                     i += 1
 
-            if (i > 0 and sys.argv[i][0] == '-'
-                    and sys.argv[i] not in Constants.noValueCommands()):
-                commandWithValue = True
-            else:
-                commandWithValue = False
+            commandWithValue = Params.commandHasValue(i)
 
             i += 1
         if sPath == '':
