@@ -1,4 +1,6 @@
 import sys
+from lib.exceptions.paramException import ParamException
+from lib.constants import Constants
 
 
 class Params():
@@ -20,8 +22,11 @@ class Params():
                 helpParam = True
             elif sys.argv[i] == '-v' or sys.argv[i] == '--verbose':
                 verbose = True
+                if quietParam:
+                    quietParam = False
             elif sys.argv[i] == '-q' or sys.argv[i] == '--quiet':
-                quietParam = True
+                if not verbose:
+                    quietParam = True
             elif sys.argv[i] == '-H' or sys.argv[i] == '--host':
                 if len(sys.argv) > i+1:
                     host = sys.argv[i+1]
@@ -43,3 +48,12 @@ class Params():
         if verbose:
             quietParam = False
         return host, port, verbose, quietParam, helpParam, lr
+
+    def validateCommand(commandsList, previousArgIsCommand, argPos):
+        if (argPos > 0 and previousArgIsCommand is False
+                and sys.argv[argPos] not in commandsList):
+            raise ParamException(sys.argv[argPos])
+
+    def commandHasValue(argPos):
+        return (argPos > 0 and sys.argv[argPos][0] == '-' and
+                sys.argv[argPos] not in Constants.noValueCommands())

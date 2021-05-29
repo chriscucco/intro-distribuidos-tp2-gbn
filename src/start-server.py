@@ -2,13 +2,22 @@ from lib.params.serverParamsValidation import ServerParams
 from lib.serverConnection.serverConnection import Connection
 from lib.serverConnection.queueHandler import QueueHandler
 from lib.logger.logger import Logger
+from lib.exceptions.paramException import ParamException
 from threading import Thread
 import socket
 import queue
 
 
 def main():
-    host, port, sPath, v, q, helpParam, lr = ServerParams.validate()
+
+    host, port, sPath, v, q, helpParam, lr = '', '', '', '', '', '', ''
+
+    try:
+        host, port, sPath, v, q, helpParam, lr = ServerParams.validate()
+    except ParamException as e:
+        printHelp()
+        Logger.log(e.message)
+        return
 
     if helpParam:
         return printHelp()

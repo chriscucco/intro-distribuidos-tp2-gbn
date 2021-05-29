@@ -9,6 +9,7 @@ TRANSFER = "T"
 ACK = "A"
 END = "E"
 ERROR = "F"
+NO_VALUE_COMMANDS = ['-h', '--help', '-v', '--verbose', '-q', '--quiet']
 
 
 class Constants:
@@ -42,3 +43,6 @@ class Constants:
 
     def maxHeaderTransProtocolSize():
         return MAX_HEADER_TRANS_PROTOCOL_SIZE
+
+    def noValueCommands():
+        return NO_VALUE_COMMANDS

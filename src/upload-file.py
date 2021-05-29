@@ -5,10 +5,17 @@ from lib.params.uploadClientParamsValidation import UploadClientParams
 from lib.logger.logger import Logger
 from lib.clientConnection.clientUpload import ClientUpload
 from lib.serverConnection.queueHandler import QueueHandler
+from lib.exceptions.paramException import ParamException
 
 
 def main():
-    host, port, fName, fSource, v, quiet, h, lr = UploadClientParams.validate()
+    host, port, fName, fSource, v, q, h, lr = '', '', '', '', '', '', '', ''
+    try:
+        host, port, fName, fSource, v, q, h, lr = UploadClientParams.validate()
+    except ParamException as e:
+        Logger.log(e.message)
+        printHelp()
+        return
 
     if h:
         return printHelp()
@@ -31,13 +38,13 @@ def main():
     clientUpload = ClientUpload()
 
     clientUpload.upload(sckt, host, port, file, fName, msgQueue, recvMsg,
-                        v, quiet, lr)
+                        v, q, lr)
 
     # Se cierra cliente
     msgQueue.put('exit')
     sckt.close()
     queueThread.join()
-    Logger.logIfNotQuiet(quiet, "Client closed")
+    Logger.logIfNotQuiet(q, "Client closed")
     return
 
 
