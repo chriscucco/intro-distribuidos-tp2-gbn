@@ -20,8 +20,11 @@ class Params():
                 helpParam = True
             elif sys.argv[i] == '-v' or sys.argv[i] == '--verbose':
                 verboseParam = True
+                if quietParam:
+                    quietParam = False
             elif sys.argv[i] == '-q' or sys.argv[i] == '--quiet':
-                quietParam = True
+                if not verboseParam:
+                    quietParam = True
             elif sys.argv[i] == '-H' or sys.argv[i] == '--host':
                 if len(sys.argv) > i+1:
                     host = sys.argv[i+1]

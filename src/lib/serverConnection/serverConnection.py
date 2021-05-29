@@ -23,7 +23,7 @@ class Connection:
                     Connection.process(s, fs, data, addr, sPath, queue, v, q)
             return
         except Exception as e:
-            print(e)
+            Logger.log(e)
             return
 
     def process(s, f, msg, addr, pth, queue, v, q):

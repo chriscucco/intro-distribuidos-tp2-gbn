@@ -2,10 +2,13 @@ import sys
 from lib.params.paramsValidation import Params
 from lib.logger.logger import Logger
 from lib.exceptions.paramException import ParamException
+from lib.constants import Constants
 
-DOWNLOAD_CLIENT_PARAMS = ['-h', '--help', '-v', '--verbose', '-q', '--quiet',
-                          '-H', '--host', '-p', '--port', '-lr', '--loss-rate',
-                          '-d', '--dst', '-n', '--name']
+DOWNLOAD_CLIENT_PARAMS = Constants.noValueCommands() + ['-H', '--host', '-p',
+                                                        '--port', '-lr',
+                                                        '--loss-rate', '-d',
+                                                        '--dst', '-n',
+                                                        '--name']
 
 
 class DownloadClientParams(Params):
@@ -19,7 +22,14 @@ class DownloadClientParams(Params):
         fName = ''
         fDest = ''
         i = 0
+        commandWithValue = False
+
         while i < len(sys.argv):
+
+            if (i > 0 and commandWithValue is False
+                    and sys.argv[i] not in DOWNLOAD_CLIENT_PARAMS):
+                raise ParamException(sys.argv[i])
+
             if sys.argv[i] == '-d' or sys.argv[i] == '--dst':
                 if len(sys.argv) > i+1:
                     fDest = sys.argv[i+1]
@@ -29,9 +39,11 @@ class DownloadClientParams(Params):
                     fName = sys.argv[i+1]
                     i += 1
 
-            if (i > 0 and i % 2 != 0 and
-                    sys.argv[i] not in DOWNLOAD_CLIENT_PARAMS):
-                raise ParamException(sys.argv[i])
+            if (i > 0 and sys.argv[i][0] == '-'
+                    and sys.argv[i] not in Constants.noValueCommands()):
+                commandWithValue = True
+            else:
+                commandWithValue = False
 
             i += 1
         if fName == '':
