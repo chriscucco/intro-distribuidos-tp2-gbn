@@ -38,10 +38,12 @@ class Params():
             elif sys.argv[i] == '-lr' or sys.argv[i] == '--loss-rate':
                 try:
                     lr = float(sys.argv[i+1])
-                    if lr >= 1.0:
-                        lr = 0.0
+                    if lr >= 1.0 or lr < 0:
+                        raise ParamException(sys.argv[i]
+                                             + ' ' + sys.argv[i+1])
                 except Exception:
-                    lr = 0.0
+                    raise ParamException(sys.argv[i]
+                                         + ' ' + sys.argv[i+1])
                 i += 1
             i += 1
         host, port = Params.processParams(host, port)
