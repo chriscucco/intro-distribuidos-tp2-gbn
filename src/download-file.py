@@ -54,7 +54,7 @@ def printHelp():
     print('-p, --port           service port')
     print('-d, --dst            destination file path')
     print('-n, --name           file name')
-    print('-lr, --loss-rate     loss messages rate')
+    print('-lr, --loss-rate     loss messages rate (value between 0 and 0.99)')
 
 
 def runQueue(skt, msgQueue, recvMsg, v):

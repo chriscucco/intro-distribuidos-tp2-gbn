@@ -86,7 +86,7 @@ def printHelp():
     print('-H, --host           service IP address')
     print('-p, --port           service port')
     print('-s, --storage        storage dir path')
-    print('-lr, --loss-rate     loss messages rate')
+    print('-lr, --loss-rate     loss messages rate (value between 0 and 1)')
 
 
 if __name__ == "__main__":
