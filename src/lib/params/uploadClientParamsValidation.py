@@ -1,6 +1,11 @@
 import sys
 from lib.params.paramsValidation import Params
 from lib.logger.logger import Logger
+from lib.exceptions.paramException import ParamException
+
+UPLOAD_CLIENT_PARAMS = ['-h', '--help', '-v', '--verbose', '-q', '--quiet',
+                        '-H', '--host', '-p', '--port', '-lr', '--loss-rate',
+                        '-s', '--src', '-n', '--name']
 
 
 class UploadClientParams(Params):
@@ -23,6 +28,11 @@ class UploadClientParams(Params):
                 if len(sys.argv) > i+1:
                     fName = sys.argv[i+1]
                     i += 1
+
+            if (i > 0 and i % 2 != 0 and
+                    sys.argv[i] not in UPLOAD_CLIENT_PARAMS):
+                raise ParamException(sys.argv[i])
+
             i += 1
         if fName == '':
             fName = 'test.txt'

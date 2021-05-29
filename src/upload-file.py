@@ -5,39 +5,48 @@ from lib.params.uploadClientParamsValidation import UploadClientParams
 from lib.logger.logger import Logger
 from lib.clientConnection.clientUpload import ClientUpload
 from lib.serverConnection.queueHandler import QueueHandler
+from lib.exceptions.paramException import ParamException
 
 
 def main():
-    host, port, fName, fSource, verb, quiet, h, lr = UploadClientParams.validate()
+
+    host, port, fName, fSource, v, q, h, lr = '', '', '', '', '', '', '', ''
+
+    try:
+        host, port, fName, fSource, v, q, h, lr = UploadClientParams.validate()
+    except ParamException as e:
+        Logger.log(e.message)
+        printHelp()
+        return
 
     if h:
         return printHelp()
 
     try:
-        Logger.logIfVerbose(verb, 'Opening file: ' + fName)
+        Logger.logIfVerbose(v, 'Opening file: ' + fName)
         file = open(fSource + fName, "rb")
     except OSError:
         Logger.log("Error opening file " + fSource + fName)
         return
 
     sckt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    Logger.logIfVerbose(verb, "Creating socket...")
+    Logger.logIfVerbose(v, "Creating socket...")
 
     msgQueue = queue.Queue()
     recvMsg = {}
-    queueThread = Thread(target=runQueue, args=(sckt, msgQueue, recvMsg, verb))
+    queueThread = Thread(target=runQueue, args=(sckt, msgQueue, recvMsg, v))
     queueThread.start()
 
     clientUpload = ClientUpload()
 
     clientUpload.upload(sckt, host, port, file, fName, msgQueue, recvMsg,
-                        verb, quiet, lr)
+                        v, q, lr)
 
     # Se cierra cliente
     msgQueue.put('exit')
     sckt.close()
     queueThread.join()
-    Logger.logIfNotQuiet(quiet, "Client closed")
+    Logger.logIfNotQuiet(q, "Client closed")
     return
 
 

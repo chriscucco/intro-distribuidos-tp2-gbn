@@ -2,13 +2,23 @@ from lib.params.downloadClientParamsValidation import DownloadClientParams
 from lib.logger.logger import Logger
 from lib.clientConnection.clientDownload import ClientDownload
 from lib.serverConnection.queueHandler import QueueHandler
+from threading import Thread
+from lib.exceptions.paramException import ParamException
 import socket
 import queue
-from threading import Thread
 
 
 def main():
-    host, port, fName, fDest, v, q, h, lr = DownloadClientParams.validate()
+
+    host, port, fName, fDest, v, q, h, lr = '', '', '', '', '', '', '', ''
+
+    try:
+        host, port, fName, fDest, v, q, h, lr = DownloadClientParams.validate()
+    except ParamException as e:
+        Logger.log(e.message)
+        printHelp()
+        return
+
     if h:
         return printHelp()
 
