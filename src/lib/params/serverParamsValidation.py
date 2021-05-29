@@ -5,10 +5,10 @@ from lib.logger.logger import Logger
 
 class ServerParams(Params):
     def validate():
-        host, port, verbose, quiet, helpParam = Params.validate()
+        host, port, verbose, quiet, helpParam, lossRate = Params.validate()
         sPath = ServerParams.getStoragePath()
         Logger.logIfVerbose(verbose, "Params parsed")
-        return host, port, sPath, verbose, quiet, helpParam
+        return host, port, sPath, verbose, quiet, helpParam, lossRate
 
     def getStoragePath():
         sPath = ''
