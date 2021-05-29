@@ -49,7 +49,7 @@ class Connection:
             Logger.logIfVerbose(verbose, "Sending ACK to client: " + str(addr))
             CommonConnection.sendACK(s, addr[0], addr[1], 'U', message, 0)
         except OSError:
-            Logger.logIfNotQuiet(quiet, "Error opening file " + message)
+            Logger.log(quiet, "Error opening file " + message)
             msg = CommonConnection.sendError(s, message, addr[0], addr[1])
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
             return
@@ -85,7 +85,7 @@ class Connection:
             msg = CommonConnection.sendMessage(s, h, p, filename, data, 0)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
         except Exception:
-            Logger.logIfNotQuiet(q, "Error opening file " + filename)
+            Logger.log(q, "Error opening file " + filename)
             msg = CommonConnection.sendError(s, filename, addr[0], addr[1])
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
             return
@@ -98,7 +98,7 @@ class Connection:
             Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
             CommonConnection.sendACK(s, addr[0], addr[1], 'F', filename, 0)
         except Exception:
-            Logger.logIfNotQuiet(q, "Error processing error")
+            Logger.log(q, "Error processing error")
             return
         return
 
@@ -109,7 +109,7 @@ class Connection:
             Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
             CommonConnection.sendACK(s, addr[0], addr[1], 'E', filename, 0)
         except Exception:
-            Logger.logIfNotQuiet(q, "Error processing end file")
+            Logger.log(q, "Error processing end file")
             return
         return
 
