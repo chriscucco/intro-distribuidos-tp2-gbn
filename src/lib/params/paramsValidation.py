@@ -3,7 +3,7 @@ import sys
 
 class Params():
     def initialize():
-        return '', '', False, False, False
+        return '', '', False, False, False, 0.0
 
     def processParams(host, port):
         if host == '':
@@ -13,7 +13,7 @@ class Params():
         return host, port
 
     def validate():
-        host, port, verboseParam, quietParam, helpParam = Params.initialize()
+        host, port, verboseParam, quietParam, helpParam, lr = Params.initialize()
         i = 0
         while i < len(sys.argv):
             if sys.argv[i] == '-h' or sys.argv[i] == '--help':
@@ -30,8 +30,16 @@ class Params():
                 if len(sys.argv) > i+1:
                     port = int(sys.argv[i+1])
                     i += 1
+            elif sys.argv[i] == '-lr' or sys.argv[i] == '--loss-rate':
+                try:
+                    lr = float(sys.argv[i+1])
+                    if lr >= 1.0:
+                        lr = 0.0
+                except Exception:
+                    lr = 0.0
+                i += 1
             i += 1
         host, port = Params.processParams(host, port)
         if verboseParam:
             quietParam = False
-        return host, port, verboseParam, quietParam, helpParam
+        return host, port, verboseParam, quietParam, helpParam, lr

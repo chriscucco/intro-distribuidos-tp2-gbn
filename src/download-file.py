@@ -8,7 +8,7 @@ from threading import Thread
 
 
 def main():
-    host, port, fName, fDest, v, q, h = DownloadClientParams.validate()
+    host, port, fName, fDest, v, q, h, lr = DownloadClientParams.validate()
     if h:
         return printHelp()
 
@@ -21,7 +21,7 @@ def main():
     queueThread.start()
 
     clientDownload = ClientDownload()
-    clientDownload.download(s, host, port, fName, fDest, msgQ, recvMsg, v, q)
+    clientDownload.download(s, host, port, fName, fDest, msgQ, recvMsg, v, q, lr)
     # Se cierra cliente
     msgQ.put('exit')
     s.close()
@@ -32,18 +32,19 @@ def main():
 
 def printHelp():
     print('usage: download-file.py [-h] [-v | -q] [-H ADDR] [-p PORT]')
-    print('[-d FILEPATH] [-n FILENAME]')
+    print('[-d FILEPATH] [-n FILENAME] [-lr LOSSRATE]')
     print('')
     print('<command description>')
     print('')
     print('optional arguments:')
-    print('-h, --help       show this help message and exit')
-    print('-v, --verbose    increase output verbosity')
-    print('-q, --quiet      decrease output verbosity')
-    print('-H, --host       service IP address')
-    print('-p, --port       service port')
-    print('-d, --dst        destination file path')
-    print('-n, --name       file name')
+    print('-h, --help           show this help message and exit')
+    print('-v, --verbose        increase output verbosity')
+    print('-q, --quiet          decrease output verbosity')
+    print('-H, --host           service IP address')
+    print('-p, --port           service port')
+    print('-d, --dst            destination file path')
+    print('-n, --name           file name')
+    print('-lr, --loss-rate     loss messages rate')
 
 
 def runQueue(skt, msgQueue, recvMsg, v):

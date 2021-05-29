@@ -8,7 +8,7 @@ import queue
 
 
 def main():
-    host, port, sPath, v, q, helpParam = ServerParams.validate()
+    host, port, sPath, v, q, helpParam, lr = ServerParams.validate()
 
     if helpParam:
         return printHelp()
@@ -30,7 +30,7 @@ def main():
     msgQueue = queue.Queue()
     recvMsg = {}
     queueThread = Thread(target=runQueue, args=(skt, msgQueue, recvMsg, v))
-    t = Thread(target=run, args=(skt, files, sPath, msgQueue, recvMsg, v, q))
+    t = Thread(target=run, args=(skt, files, sPath, msgQueue, recvMsg, v, q, lr))
     t.start()
     queueThread.start()
     serverOn = True
@@ -54,8 +54,8 @@ def main():
     return
 
 
-def run(s, f, sPath, msgQueue, recvMsg, v, q):
-    Connection.startCommunicating(s, f, sPath, msgQueue, recvMsg, v, q)
+def run(s, f, sPath, msgQueue, recvMsg, v, q, lr):
+    Connection.startCommunicating(s, f, sPath, msgQueue, recvMsg, v, q, lr)
     return
 
 
@@ -66,17 +66,18 @@ def runQueue(skt, msgQueue, recvMsg, v):
 
 def printHelp():
     print('usage: start-server.py [-h] [-v|-q] [-H ADDR] [-p PORT]')
-    print(' [-s DIRPATH]')
+    print(' [-s DIRPATH] [-lr LOSSRATE]')
     print('')
     print('<command description>')
     print('')
     print('optional arguments:')
-    print('-h, --help       show this help message and exit')
-    print('-v, --verbose    increase output verbosity')
-    print('-q, --quiet      decrease output verbosity')
-    print('-H, --host       service IP address')
-    print('-p, --port       service port')
-    print('-s, --storage    storage dir path')
+    print('-h, --help           show this help message and exit')
+    print('-v, --verbose        increase output verbosity')
+    print('-q, --quiet          decrease output verbosity')
+    print('-H, --host           service IP address')
+    print('-p, --port           service port')
+    print('-s, --storage        storage dir path')
+    print('-lr, --loss-rate     loss messages rate')
 
 
 if __name__ == "__main__":

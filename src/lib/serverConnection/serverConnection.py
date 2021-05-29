@@ -3,21 +3,24 @@ from lib.commonConnection.commonConnection import CommonConnection
 from lib.logger.logger import Logger
 from lib.helpers.fileHelper import FileHelper
 from lib.serverConnection.queueHandler import QueueHandler
+import random
 import os
 
 
 class Connection:
-    def startCommunicating(s, fs, sPath, queue, recvMsg, v, q):
+    def startCommunicating(s, fs, sPath, queue, recvMsg, v, q, lr):
         try:
             while True:
+                r = random.random()
                 data, addr = s.recvfrom(Constants.bytesChunk())
-                Logger.logIfVerbose(v, "Recieved message from: " + str(addr))
-                mode = data[0:1]
-                if mode.decode() == 'A':
-                    msg = data.decode()
-                    qMsg = msg + '-' + str(addr[0]) + '-' + str(addr[1])
-                    recvMsg[qMsg] = True
-                Connection.process(s, fs, data, addr, sPath, queue, v, q)
+                if r > lr:
+                    Logger.logIfVerbose(v, "Recieved message from: " + str(addr))
+                    mode = data[0:1]
+                    if mode.decode() == 'A':
+                        msg = data.decode()
+                        qMsg = msg + '-' + str(addr[0]) + '-' + str(addr[1])
+                        recvMsg[qMsg] = True
+                    Connection.process(s, fs, data, addr, sPath, queue, v, q)
             return
         except Exception as e:
             print(e)

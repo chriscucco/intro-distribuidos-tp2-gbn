@@ -31,7 +31,7 @@ class ClientUpload:
 
                 if msgRcvd[0] == Constants.ackProtocol():
                     break
-
+            Logger.logIfVerbose(verbose, 'Sending message to server')
             message = CommonConnection.sendMessage(sckt, host, port,
                                                    fName, data,
                                                    bytesAlreadySent)
@@ -56,7 +56,7 @@ class ClientUpload:
         return True
 
     def upload(self, sckt, host, port, file, fName, msgQueue, recvMsg,
-               verbose, quiet):
+               verbose, quiet, lr):
 
         Logger.logIfVerbose(verbose, "Sending upload code to server:" +
                             str(host) + ", " + str(port))

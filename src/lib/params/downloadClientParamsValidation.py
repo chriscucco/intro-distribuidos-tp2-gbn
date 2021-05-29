@@ -5,10 +5,10 @@ from lib.logger.logger import Logger
 
 class DownloadClientParams(Params):
     def validate():
-        host, port, verbose, quiet, helpParam = Params.validate()
+        host, port, verbose, quiet, helpParam, lossRate = Params.validate()
         fName, fDest = DownloadClientParams.getDestinationPathAndFilename()
         Logger.logIfVerbose(verbose, "Params parsed")
-        return host, port, fName, fDest, verbose, quiet, helpParam
+        return host, port, fName, fDest, verbose, quiet, helpParam, lossRate
 
     def getDestinationPathAndFilename():
         fName = ''

@@ -8,7 +8,7 @@ from lib.serverConnection.queueHandler import QueueHandler
 
 
 def main():
-    host, port, fName, fSource, verb, quiet, h = UploadClientParams.validate()
+    host, port, fName, fSource, verb, quiet, h, lr = UploadClientParams.validate()
 
     if h:
         return printHelp()
@@ -31,7 +31,7 @@ def main():
     clientUpload = ClientUpload()
 
     clientUpload.upload(sckt, host, port, file, fName, msgQueue, recvMsg,
-                        verb, quiet)
+                        verb, quiet, lr)
 
     # Se cierra cliente
     msgQueue.put('exit')
@@ -43,18 +43,19 @@ def main():
 
 def printHelp():
     print('usage: upload-file.py [-h] [-v|-q] [-H ADDR] [-p PORT]')
-    print('[-s FILEPATH] [-n FILENAME]')
+    print('[-s FILEPATH] [-n FILENAME] [-lr LOSSRATE]')
     print('')
     print('<command description>')
     print('')
     print('optional arguments:')
-    print('-h, --help       show this help message and exit')
-    print('-v, --verbose    increase output verbosity')
-    print('-q, --quiet      decrease output verbosity')
-    print('-H, --host       server IP address')
-    print('-p, --port       server port')
-    print('-s, --src        source file path')
-    print('-n, --name       file name')
+    print('-h, --help           show this help message and exit')
+    print('-v, --verbose        increase output verbosity')
+    print('-q, --quiet          decrease output verbosity')
+    print('-H, --host           server IP address')
+    print('-p, --port           server port')
+    print('-s, --src            source file path')
+    print('-n, --name           file name')
+    print('-lr, --loss-rate     loss messages rate')
 
 
 def runQueue(skt, msgQueue, recvMsg, v):
