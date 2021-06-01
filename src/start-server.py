@@ -38,7 +38,6 @@ def main():
 
     msgQueue = queue.Queue()
     rMsg = {}
-    serverState = queue.Queue()
 
     queueThread = Thread(target=runQueue, args=(skt, msgQueue, rMsg, v))
     t = Thread(target=run, args=(skt, files, sPath, msgQueue, rMsg, v, q, lr))
