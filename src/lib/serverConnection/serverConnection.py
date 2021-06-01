@@ -8,14 +8,9 @@ import os
 
 
 class Connection:
-    def startCommunicating(s, fs, sPath, queue, recvMsg, v, q, lr,
-                           serverState):
+    def startCommunicating(s, fs, sPath, queue, recvMsg, v, q, lr):
         try:
             while True:
-                item = serverState.get()
-                if item == 'exit':
-                    break
-
                 r = random.random()
                 data, addr = s.recvfrom(Constants.bytesChunk())
                 if r >= lr:

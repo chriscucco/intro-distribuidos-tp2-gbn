@@ -41,8 +41,7 @@ def main():
     serverState = queue.Queue()
 
     queueThread = Thread(target=runQueue, args=(skt, msgQueue, rMsg, v))
-    t = Thread(target=run, args=(skt, files, sPath, msgQueue, rMsg, v, q, lr,
-               serverState))
+    t = Thread(target=run, args=(skt, files, sPath, msgQueue, rMsg, v, q, lr))
     t.start()
     queueThread.start()
 
@@ -54,10 +53,9 @@ def main():
 
     Logger.logIfNotQuiet(q, "Closing server...")
     msgQueue.put('exit')
-    serverState.put('exit')
     skt.close()
-    queueThread.join()
     t.join()
+    queueThread.join()
 
     for key, f in files.items():
         try:
@@ -69,9 +67,8 @@ def main():
     return
 
 
-def run(s, f, sPath, msgQueue, recvMsg, v, q, lr, serverState):
-    Connection.startCommunicating(s, f, sPath, msgQueue, recvMsg, v, q, lr,
-                                  serverState)
+def run(s, f, sPath, msgQueue, recvMsg, v, q, lr):
+    Connection.startCommunicating(s, f, sPath, msgQueue, recvMsg, v, q, lr)
     return
 
 
