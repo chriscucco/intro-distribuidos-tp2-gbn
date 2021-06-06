@@ -1,10 +1,11 @@
 import os
-
+from lib.helpers.fileHelper import FileHelper
 from lib.constants import Constants
 from lib.commonConnection.commonConnection import CommonConnection
 from lib.logger.logger import Logger
 from lib.serverConnection.queueHandler import QueueHandler
 import random
+import time
 
 
 class ClientUpload:
@@ -15,31 +16,25 @@ class ClientUpload:
         bytesSent = 0
         addr = (host, port)
         Logger.logIfNotQuiet(quiet, "Sending file to server...")
-        r = random.random()
 
-        while True:
-            if r >= lr:
-                file.seek(bytesSent, os.SEEK_SET)
-                data = file.read(Constants.getMaxReadSize())
-
-                if len(data) == 0:
-                    Logger.logIfVerbose(verbose, "Sending EOF to server: "
-                                        + str(host) + ", " + str(port))
-                    msg = CommonConnection.sendEndFile(s, host, port,
-                                                       fName, bytesSent)
-                    msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr))
-
-                    rcvd = CommonConnection.receiveMessageFromServer(s, addr)
-                    recvMsg[rcvd+'-'+str(addr[0])+'-'+str(addr[1])] = True
-
-                    if rcvd[0] == Constants.ackProtocol():
-                        break
-                Logger.logIfVerbose(verbose, 'Sending message to server')
-                message = CommonConnection.sendMessage(s, host, port,
-                                                       fName, data,
-                                                       bytesSent)
-                msgQueue.put(QueueHandler.makeMessageExpected(message, addr))
-
+        i = Constants.getWin()
+        endFile = False
+        endRecv = False
+        while i > 0:
+            previousPos = file.tell()
+            data = file.read(Constants.getMaxReadSize())
+            if len(data) == 0:
+                size = FileHelper.getFileSize(file)
+                Logger.logIfVerbose(verbose, "Sending EndFile to client: " + str(addr))
+                msg = CommonConnection.sendEndFile(s, addr[0], addr[1], fName, size)
+                msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr, size))
+                endFile = True
+                break
+            Logger.logIfVerbose(verbose, "Sending message to client: " + str(addr))
+            msg = CommonConnection.sendMessage(s, addr[0], addr[1], fName, data, previousPos)
+            msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
+            i -= 1
+        while not endFile:
             msgRcvd = CommonConnection.receiveMessageFromServer(s, addr)
             r = random.random()
             if r >= lr:
@@ -53,10 +48,40 @@ class ClientUpload:
                     file.close()
                     return False
 
-                if msgRcvd[0] == Constants.ackProtocol():
-                    splittedMsg = msgRcvd.split(';')
-                    bytesSent = int(splittedMsg[1])
-
+                splittedMsg = msgRcvd.split(';')
+                bytesSent = int(splittedMsg[1])
+                file.seek(bytesSent, os.SEEK_SET)
+                mustSendEnd = False
+                i = Constants.getWin() - 1
+                while i > 0:
+                    data = file.read(Constants.getMaxReadSize())
+                    if len(data) == 0 and i == (Constants.getWin() - 1):
+                        mustSendEnd = True
+                        i = 0
+                    else:
+                        i -= 1
+                posBeforeRead = file.tell()
+                data = file.read(Constants.getMaxReadSize())
+                if len(data) == 0:
+                    if mustSendEnd:
+                        size = FileHelper.getFileSize(file)
+                        Logger.logIfVerbose(verbose, "Sending EOF to server: " + str(addr))
+                        msg = CommonConnection.sendEndFile(s, addr[0], addr[1], fName, size)
+                        msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr, size))
+                        endFile = True
+                else:
+                    h = addr[0]
+                    port = addr[1]
+                    Logger.logIfVerbose(verbose, "Sending message to server" + str(addr))
+                    msg = CommonConnection.sendMessage(s, h, port, fName, data, posBeforeRead)
+                    msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
+        while not endRecv:
+            msgRcvd = CommonConnection.receiveMessageFromServer(s, addr)
+            r = random.random()
+            if r >= lr:
+                recvMsg[msgRcvd+'-'+str(addr[0])+'-'+str(addr[1])] = True
+                if msgRcvd[0] == Constants.ackProtocol() and msgRcvd[1] == Constants.endProtocol():
+                    endRecv = True
         return True
 
     def upload(self, sckt, host, port, file, fName, msgQueue, recvMsg,
@@ -64,10 +89,10 @@ class ClientUpload:
 
         Logger.logIfVerbose(verbose, "Sending upload code to server:" +
                             str(host) + ", " + str(port))
-        message = Constants.uploadProtocol() + fName
+        message = Constants.uploadProtocol() + fName + ';0'
         addr = (host, port)
         sckt.sendto(message.encode(), addr)
-        msgQueue.put(QueueHandler.makeSimpleExpected(message.encode(), addr))
+        msgQueue.put(QueueHandler.makeSimpleExpected(message.encode(), addr, 0))
 
         message = CommonConnection.receiveMessageFromServer(sckt, addr)
         recvMsg[message+'-'+str(addr[0])+'-'+str(addr[1])] = True

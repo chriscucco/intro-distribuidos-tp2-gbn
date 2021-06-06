@@ -45,15 +45,17 @@ class Connection:
 
     def startUpload(s, files, msg, addr, sPath, msgQueue, verbose, quiet):
         message = msg.decode()
+        splittedMsg = message.split(';')
+        fname = splittedMsg[0]
         try:
-            file = open(sPath+message, "wb")
-            Logger.logIfVerbose(verbose, "File " + message + " opened")
-            files[message] = file
+            file = open(sPath+fname, "wb")
+            Logger.logIfVerbose(verbose, "File " + fname + " opened")
+            files[fname] = file
             Logger.logIfVerbose(verbose, "Sending ACK to client: " + str(addr))
-            CommonConnection.sendACK(s, addr[0], addr[1], 'U', message, 0)
+            CommonConnection.sendACK(s, addr[0], addr[1], 'U', fname, 0)
         except OSError:
-            Logger.log("Error opening file " + message)
-            msg = CommonConnection.sendError(s, message, addr[0], addr[1])
+            Logger.log("Error opening file " + fname)
+            msg = CommonConnection.sendError(s, fname, addr[0], addr[1])
             msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr, 0))
             return
         return
@@ -184,6 +186,6 @@ class Connection:
             Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
             filesize = FileHelper.getFileSize(f)
             CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, filesize)
-        else:
-            CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, filesize)
+        elif bytesRecv < filesize:
+            CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, bytesRecv + Constants.getMaxReadSize())
         return
