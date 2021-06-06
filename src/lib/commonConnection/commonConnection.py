@@ -23,7 +23,7 @@ class CommonConnection:
 
     def sendEndFile(socket, host, port, filename, bytesAlreadyReceived):
         addr = (host, port)
-        message = 'E'+filename
+        message = 'E'+filename+';'+str(bytesAlreadyReceived)
         try:
             socket.sendto(message.encode(), addr)
         except socket.error:

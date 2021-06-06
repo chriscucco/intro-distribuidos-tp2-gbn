@@ -15,7 +15,6 @@ class QueueHandler:
             sleepTime = (item["ttl"] - now).total_seconds()
             if sleepTime > 0:
                 time.sleep(int(sleepTime)+1)
-
             expectedMsg = item['expected']
             messageRecv = recvMsg.get(expectedMsg, False)
 
@@ -26,9 +25,9 @@ class QueueHandler:
             msgQueue.task_done()
         return
 
-    def makeSimpleExpected(currentMsg, addr):
+    def makeSimpleExpected(currentMsg, addr, size):
         decodedMsg = currentMsg.decode()
-        expected = 'A' + decodedMsg + ';0' + '-' + addr[0] + '-' + str(addr[1])
+        expected = 'A' + decodedMsg + '-' + addr[0] + '-' + str(addr[1])
         secs = Constants.ttl()
         ttl = datetime.datetime.now() + datetime.timedelta(seconds=secs)
         d = dict()

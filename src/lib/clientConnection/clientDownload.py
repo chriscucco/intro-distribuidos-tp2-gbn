@@ -13,7 +13,7 @@ class ClientDownload:
         Logger.logIfVerbose(v, "Sending download request to server")
         addr = (host, port)
         s.sendto(message.encode(), addr)
-        expected = QueueHandler.makeSimpleExpected(message.encode(), addr)
+        expected = QueueHandler.makeSimpleExpected(message.encode(), addr, 0)
         msgQueue.put(expected)
         data, addr = s.recvfrom(Constants.bytesChunk())
         rMsg[expected['expected']] = True
@@ -37,18 +37,27 @@ class ClientDownload:
                     bRecv = int(processedData[0:separatorPossition])
                     Logger.logIfVerbose(v, "Recieved " + str(bRecv) +
                                         " bytes from server: " + str(addr))
-                    file.seek(bRecv, os.SEEK_SET)
-                    file.write(msg)
                     size = FileHelper.getFileSize(file)
-                    Logger.logIfVerbose(v, "Sending ACK-T to server: "
-                                        + str(addr))
-                    CommonConnection.sendACK(s, host, port, 'T', fname, size)
+                    if bRecv == size:
+                        file.seek(bRecv, os.SEEK_SET)
+                        file.write(msg)
+                        size = FileHelper.getFileSize(file)
+                        Logger.logIfVerbose(v, "Sending ACK-T to server: "
+                                            + str(addr))
+                        CommonConnection.sendACK(s, host, port, 'T', fname, size)
+                    else:
+                        CommonConnection.sendACK(s, host, port, 'T', fname, size)
                 elif mode.decode() == Constants.endProtocol():
-                    Logger.logIfVerbose(v, "Sending ACK-E to server: "
-                                        + str(addr))
-                    CommonConnection.sendACK(s, host, port, 'E', fname, 0)
-                    Logger.log("File downloaded successfully in: "+dest+fname)
-                    file.close()
+                    msg = processedData.decode()
+                    separatorPossition = msg.find(';')
+                    size = int(msg[separatorPossition+1:])
+                    filesize = FileHelper.getFileSize(file)
+                    if size == filesize:
+                        Logger.logIfVerbose(v, "Sending ACK-E to server: "
+                                            + str(addr))
+                        CommonConnection.sendACK(s, host, port, 'E', fname, size)
+                        Logger.log("File downloaded successfully in: "+dest+fname)
+                        file.close()
                     return
             data, addr = s.recvfrom(Constants.bytesChunk())
             mode = data[0:1]
