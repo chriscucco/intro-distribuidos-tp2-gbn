@@ -3,6 +3,7 @@ from lib.commonConnection.commonConnection import CommonConnection
 from lib.logger.logger import Logger
 from lib.helpers.fileHelper import FileHelper
 from lib.serverConnection.queueHandler import QueueHandler
+import time
 import random
 import os
 
@@ -127,6 +128,8 @@ class Connection:
                 f.close()
                 Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
                 CommonConnection.sendACK(s, addr[0], addr[1], 'E', fname, size)
+            elif size < filesize:
+                        CommonConnection.sendACK(s, host, port, 'T', fname, size + Constants.getMaxReadSize())
         except Exception:
             Logger.log("Error processing end file")
             return
@@ -148,12 +151,12 @@ class Connection:
 
     def download(s, f, fname, br, addr, msgQueue, v, q):
         f.seek(br, os.SEEK_SET)
-        mustSendEnd = True
+        mustSendEnd = False
         i = Constants.getWin() - 1
         while i > 0:
             data = f.read(Constants.getMaxReadSize())
-            if len(data) == 0:
-                mustSendEnd = False
+            if len(data) == 0 and i == (Constants.getWin() - 1):
+                mustSendEnd = True
                 i = 0
             else:
                 i -= 1

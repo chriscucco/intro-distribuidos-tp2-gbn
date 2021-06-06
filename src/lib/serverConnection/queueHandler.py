@@ -6,6 +6,7 @@ from lib.constants import Constants
 
 class QueueHandler:
     def handleQueue(srvSock, msgQueue, recvMsg, v):
+        donePorts = {}
         Logger.logIfVerbose(v, "Handler queue initialized")
         while True:
             item = msgQueue.get()
@@ -14,7 +15,7 @@ class QueueHandler:
             now = datetime.datetime.now()
             sleepTime = (item["ttl"] - now).total_seconds()
             if sleepTime > 0:
-                time.sleep(int(sleepTime)+1)
+                time.sleep(sleepTime)
             expectedMsg = item['expected']
             messageRecv = recvMsg.get(expectedMsg, False)
 
@@ -35,7 +36,7 @@ class QueueHandler:
         d['ttl'] = ttl
         d['msg'] = currentMsg
         d['addr'] = addr
-        d['retrySize'] = 5
+        d['retrySize'] = 10
         return d
 
     def makeMessageExpected(currentMsg, addr):
@@ -57,21 +58,20 @@ class QueueHandler:
         d['ttl'] = ttl
         d['msg'] = currentMsg
         d['addr'] = addr
-        d['retrySize'] = 5
+        d['retrySize'] = 20
         return d
 
     def retry(srvSock, item, msgQueue, v):
         addr = item['addr']
         message = item['msg']
-        Logger.logIfVerbose(v, "Retrying package to: " + str(addr))
+        Logger.logIfVerbose(v, "Retrying package to: " + str(addr) + 
+                            ", remaining " + str(item['retrySize']) +
+                            ' retries')
         srvSock.sendto(message, addr)
         item['ttl'] = datetime.datetime.now() + datetime.timedelta(
             seconds=Constants.ttl())
         mode = message[0:1].decode()
-        if mode == 'T' or mode == 'D' or mode == 'U':
+        if item['retrySize'] > 0:
             msgQueue.put(item)
-        if mode == 'E' or mode == 'F':
-            if item['retrySize'] > 0:
-                msgQueue.put(item)
-                item['retrySize'] -= 1
+            item['retrySize'] -= 1
         return

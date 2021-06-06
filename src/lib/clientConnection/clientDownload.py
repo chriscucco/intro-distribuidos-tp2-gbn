@@ -45,8 +45,8 @@ class ClientDownload:
                         Logger.logIfVerbose(v, "Sending ACK-T to server: "
                                             + str(addr))
                         CommonConnection.sendACK(s, host, port, 'T', fname, size)
-                    else:
-                        CommonConnection.sendACK(s, host, port, 'T', fname, size)
+                    elif bRecv < size:
+                        CommonConnection.sendACK(s, host, port, 'T', fname, bRecv + Constants.getMaxReadSize())
                 elif mode.decode() == Constants.endProtocol():
                     msg = processedData.decode()
                     separatorPossition = msg.find(';')
