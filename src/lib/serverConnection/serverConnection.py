@@ -3,7 +3,6 @@ from lib.commonConnection.commonConnection import CommonConnection
 from lib.logger.logger import Logger
 from lib.helpers.fileHelper import FileHelper
 from lib.serverConnection.queueHandler import QueueHandler
-import time
 import random
 import os
 
@@ -129,7 +128,7 @@ class Connection:
                 Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
                 CommonConnection.sendACK(s, addr[0], addr[1], 'E', fname, size)
             elif size < filesize:
-                        CommonConnection.sendACK(s, host, port, 'T', fname, size + Constants.getMaxReadSize())
+                CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, size + Constants.getMaxReadSize())
         except Exception:
             Logger.log("Error processing end file")
             return
