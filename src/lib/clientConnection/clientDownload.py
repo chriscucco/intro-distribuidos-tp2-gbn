@@ -8,10 +8,10 @@ import random
 
 
 class ClientDownload:
-    def download(self, s, host, port, fName, dest, msgQueue, rMsg, v, q, lr):
+    def download(self, s, h, p, fName, dest, msgQueue, rMsg, v, q, lr):
         message = Constants.downloadProtocol() + fName
         Logger.logIfVerbose(v, "Sending download request to server")
-        addr = (host, port)
+        addr = (h, p)
         s.sendto(message.encode(), addr)
         expected = QueueHandler.makeSimpleExpected(message.encode(), addr, 0)
         msgQueue.put(expected)
@@ -44,9 +44,10 @@ class ClientDownload:
                         size = FileHelper.getFileSize(file)
                         Logger.logIfVerbose(v, "Sending ACK-T to server: "
                                             + str(addr))
-                        CommonConnection.sendACK(s, host, port, 'T', fname, size)
+                        CommonConnection.sendACK(s, h, p, 'T', fname, size)
                     elif bRecv < size:
-                        CommonConnection.sendACK(s, host, port, 'T', fname, bRecv + Constants.getMaxReadSize())
+                        CommonConnection.sendACK(s, h, p, 'T', fname, bRecv +
+                                                 Constants.getMaxReadSize())
                 elif mode.decode() == Constants.endProtocol():
                     msg = processedData.decode()
                     separatorPossition = msg.find(';')
@@ -55,8 +56,9 @@ class ClientDownload:
                     if size == filesize:
                         Logger.logIfVerbose(v, "Sending ACK-E to server: "
                                             + str(addr))
-                        CommonConnection.sendACK(s, host, port, 'E', fname, size)
-                        Logger.log("File downloaded successfully in: "+dest+fname)
+                        CommonConnection.sendACK(s, h, p, 'E', fname, size)
+                        Logger.log("File downloaded successfully in: " +
+                                   dest + fname)
                         file.close()
                     return
             data, addr = s.recvfrom(Constants.bytesChunk())

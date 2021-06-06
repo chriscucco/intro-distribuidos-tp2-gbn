@@ -91,12 +91,16 @@ class Connection:
                 data = file.read(Constants.getMaxReadSize())
                 if len(data) == 0:
                     size = FileHelper.getFileSize(file)
-                    Logger.logIfVerbose(v, "Sending EndFile to client: " + str(addr))
-                    msg = CommonConnection.sendEndFile(s, addr[0], addr[1], filename, size)
-                    msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr, size))
+                    Logger.logIfVerbose(v, "Sending EndFile to client: " +
+                                        str(addr))
+                    msg = CommonConnection.sendEndFile(s, addr[0], addr[1],
+                                                       filename, size)
+                    msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr,
+                                                                 size))
                     break
-                Logger.logIfVerbose(v, "Sending message to client: " + str(addr))
-                msg = CommonConnection.sendMessage(s, h, p, filename, data, previousPos)
+                Logger.logIfVerbose(v, "Sending msg to client: " + str(addr))
+                msg = CommonConnection.sendMessage(s, h, p, filename, data,
+                                                   previousPos)
                 msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
                 i -= 1
         except Exception:
@@ -130,7 +134,8 @@ class Connection:
                 Logger.logIfVerbose(v, "Sending ACK to client: " + str(addr))
                 CommonConnection.sendACK(s, addr[0], addr[1], 'E', fname, size)
             elif size < filesize:
-                CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, size + Constants.getMaxReadSize())
+                CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname,
+                                         size + Constants.getMaxReadSize())
         except Exception:
             Logger.log("Error processing end file")
             return
@@ -166,14 +171,16 @@ class Connection:
         if len(data) == 0:
             if mustSendEnd:
                 size = FileHelper.getFileSize(f)
-                Logger.logIfVerbose(v, "Sending EndFile to client: " + str(addr))
-                msg = CommonConnection.sendEndFile(s, addr[0], addr[1], fname, size)
+                Logger.logIfVerbose(v, "Sending EOF to client: " + str(addr))
+                msg = CommonConnection.sendEndFile(s, addr[0], addr[1], fname,
+                                                   size)
                 msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr, size))
         else:
             h = addr[0]
             port = addr[1]
             Logger.logIfVerbose(v, "Sending message to client: " + str(addr))
-            msg = CommonConnection.sendMessage(s, h, port, fname, data, posBeforeRead)
+            msg = CommonConnection.sendMessage(s, h, port, fname, data,
+                                               posBeforeRead)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
         return
 
@@ -187,5 +194,6 @@ class Connection:
             filesize = FileHelper.getFileSize(f)
             CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, filesize)
         elif bytesRecv < filesize:
-            CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname, bytesRecv + Constants.getMaxReadSize())
+            CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname,
+                                     bytesRecv + Constants.getMaxReadSize())
         return
