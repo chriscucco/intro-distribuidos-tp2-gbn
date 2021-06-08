@@ -35,15 +35,13 @@ class ClientDownload:
                     processedData = values[separatorPossition+1:]
                     separatorPossition = processedData.find(';')
                     bRecv = int(processedData[0:separatorPossition])
-                    Logger.logIfVerbose(v, "Recieved " + str(bRecv) +
-                                        " bytes from server: " + str(addr))
                     size = FileHelper.getFileSize(file)
                     if bRecv == size:
+                        Logger.logIfVerbose(v, "Recieved " + str(bRecv) +
+                                            " bytes from server: " + str(addr))
                         file.seek(bRecv, os.SEEK_SET)
                         file.write(msg)
                         size = FileHelper.getFileSize(file)
-                        Logger.logIfVerbose(v, "Sending ACK-T to server: "
-                                            + str(addr))
                         CommonConnection.sendACK(s, h, p, 'T', fname, size)
                     elif bRecv < size:
                         CommonConnection.sendACK(s, h, p, 'T', fname, bRecv +
@@ -54,8 +52,6 @@ class ClientDownload:
                     size = int(msg[separatorPossition+1:])
                     filesize = FileHelper.getFileSize(file)
                     if size == filesize:
-                        Logger.logIfVerbose(v, "Sending ACK-E to server: "
-                                            + str(addr))
                         CommonConnection.sendACK(s, h, p, 'E', fname, size)
                         Logger.log("File downloaded successfully in: " +
                                    dest + fname)
@@ -70,7 +66,6 @@ class ClientDownload:
                           addr, verb, quiet):
         if mode == Constants.errorProtocol():
             Logger.log("The file does not exist on the server")
-            Logger.logIfVerbose(verb, "Sending ACK-F to server: " + str(addr))
             CommonConnection.sendACK(downSock, addr[0], addr[1], 'F', fName, 0)
             return None
         elif mode == Constants.fileTransferProtocol():

@@ -29,7 +29,6 @@ class ClientUpload:
                 msgQueue.put(QueueHandler.makeSimpleExpected(msg, addr, size))
                 endFile = True
                 break
-            Logger.logIfVerbose(v, "Sending message to client: " + str(addr))
             msg = CommonConnection.sendMessage(s, h, p, fName, data, prevPos)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
             i -= 1
@@ -40,8 +39,6 @@ class ClientUpload:
                 recvMsg[msgRcvd+'-'+str(h)+'-'+str(p)] = True
                 if msgRcvd[0] == Constants.errorProtocol():
                     Logger.log("Server cant process the file transfer")
-                    Logger.logIfVerbose(v, "Sending ACK to server: " +
-                                        str(h) + ", " + str(p))
                     CommonConnection.sendACK(s, h, p, 'F', fName,
                                              bytesSent)
                     file.close()
@@ -71,7 +68,6 @@ class ClientUpload:
                                                                      size))
                         endFile = True
                 else:
-                    Logger.logIfVerbose(v, "Sending msg to server"+str(addr))
                     msg = CommonConnection.sendMessage(s, h, p, fName, data,
                                                        posBeforeRead)
                     msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
@@ -106,8 +102,6 @@ class ClientUpload:
                                                  quiet, lr)
         elif message[0] == Constants.errorProtocol():
             Logger.log("Server cant process upload work")
-            Logger.logIfVerbose(v, "Sending ACK to server: " +
-                                str(h) + ", " + str(p))
             CommonConnection.sendACK(sckt, h, p, 'F', fName, 0)
             file.close()
             return
