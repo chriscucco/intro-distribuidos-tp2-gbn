@@ -66,10 +66,14 @@ class QueueHandler:
         Logger.logIfVerbose(v, "Retrying package to: " + str(addr) +
                             ", remaining " + str(item['retrySize']) +
                             ' retries')
-        srvSock.sendto(message, addr)
-        item['ttl'] = datetime.datetime.now() + datetime.timedelta(
-            seconds=Constants.ttl())
-        if item['retrySize'] > 0:
-            msgQueue.put(item)
-            item['retrySize'] -= 1
-        return
+        try:
+
+            srvSock.sendto(message, addr)
+            item['ttl'] = datetime.datetime.now() + datetime.timedelta(
+                seconds=Constants.ttl())
+            if item['retrySize'] > 0:
+                msgQueue.put(item)
+                item['retrySize'] -= 1
+            return
+        except Exception:
+            return
