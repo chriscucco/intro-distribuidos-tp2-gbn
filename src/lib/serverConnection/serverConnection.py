@@ -143,7 +143,8 @@ class Connection:
                 CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname,
                                          size + Constants.getMaxReadSize())
         except Exception as e:
-            print(e)
+            if f.close:
+                return
             Logger.log("Error processing end file")
             return
         return
