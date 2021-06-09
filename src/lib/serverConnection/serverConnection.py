@@ -5,13 +5,15 @@ from lib.helpers.fileHelper import FileHelper
 from lib.serverConnection.queueHandler import QueueHandler
 import random
 import os
+import socket
 
 
 class Connection:
-    def startCommunicating(s, fs, sPath, queue, recvMsg, v, q, lr):
-        try:
-            while True:
-                r = random.random()
+    def startCommunicating(s, fs, sPath, queue, recvMsg, cont, v, q, lr):
+        s.settimeout(1.0)
+        while True:
+            r = random.random()
+            try:
                 data, addr = s.recvfrom(Constants.bytesChunk())
                 if r >= lr:
                     mode = data[0:1]
@@ -20,9 +22,13 @@ class Connection:
                         qMsg = msg + '-' + str(addr[0]) + '-' + str(addr[1])
                         recvMsg[qMsg] = True
                     Connection.process(s, fs, data, addr, sPath, queue, v, q)
-            return
-        except Exception:
-            return
+            except socket.timeout:
+                close = cont.get('exit', False)
+                if close:
+                    break
+            except Exception:
+                break
+        return
 
     def process(s, f, msg, addr, pth, queue, v, q):
         mode = msg[0:1].decode()
