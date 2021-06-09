@@ -182,6 +182,8 @@ class Connection:
         else:
             h = addr[0]
             port = addr[1]
+            Logger.logIfVerbose(v, "Sending " + str(br) + " bytes to client: "
+                                + str(addr))
             msg = CommonConnection.sendMessage(s, h, port, fname, data,
                                                posBeforeRead)
             msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
