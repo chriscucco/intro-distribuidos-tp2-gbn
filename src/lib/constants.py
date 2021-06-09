@@ -11,6 +11,7 @@ END = "E"
 ERROR = "F"
 NO_VALUE_COMMANDS = ['-h', '--help', '-v', '--verbose', '-q', '--quiet']
 TRANSFERWINDOW = 5
+MAX_RETRIES_AMOUNT = 9
 
 
 class Constants:
@@ -50,3 +51,6 @@ class Constants:
 
     def getWin():
         return TRANSFERWINDOW
+
+    def maxRetriesAmount():
+        return MAX_RETRIES_AMOUNT

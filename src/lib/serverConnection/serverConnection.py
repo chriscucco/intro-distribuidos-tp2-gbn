@@ -129,10 +129,12 @@ class Connection:
             if filesize == size:
                 f.close()
                 CommonConnection.sendACK(s, addr[0], addr[1], 'E', fname, size)
+                Logger.log("File " + fname + " was successfully stored")
             elif size < filesize:
                 CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname,
                                          size + Constants.getMaxReadSize())
-        except Exception:
+        except Exception as e:
+            print(e)
             Logger.log("Error processing end file")
             return
         return
