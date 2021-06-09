@@ -90,6 +90,9 @@ class Connection:
             files[filename] = file
             h = addr[0]
             p = addr[1]
+            Logger.logIfVerbose(v, filename +
+                                " begins to be sent to the client "
+                                + str(addr))
             i = Constants.getWin()
             while i > 0:
                 previousPos = file.tell()
