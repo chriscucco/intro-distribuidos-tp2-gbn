@@ -149,7 +149,12 @@ class Connection:
         data = msg.decode()
         md = data[0]
         processedData = data[1:]
-        if md == Constants.endProtocol() or md == Constants.errorProtocol():
+        if md == Constants.endProtocol():
+            separatorPossition = processedData.find(';')
+            fname = processedData[0:separatorPossition]
+            Logger.log("File " + fname + " was successfully sent")
+            return
+        elif md == Constants.errorProtocol():
             return
         elif md == Constants.fileTransferProtocol():
             separatorPossition = processedData.find(';')
