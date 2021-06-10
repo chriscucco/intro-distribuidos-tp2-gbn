@@ -142,8 +142,9 @@ class Connection:
             elif size < filesize:
                 CommonConnection.sendACK(s, addr[0], addr[1], 'T', fname,
                                          size + Constants.getMaxReadSize())
-        except Exception as e:
+        except Exception:
             if f.close:
+                CommonConnection.sendACK(s, addr[0], addr[1], 'E', fname, size)
                 return
             Logger.log("Error processing end file")
             return

@@ -69,7 +69,8 @@ class ClientUpload:
                         endFile = True
                 else:
                     Logger.logIfVerbose(v, "Sending " + str(bytesSent) +
-                                        " bytes to server: " + str(h) + ", " + str(p))
+                                        " bytes to server: " + str(h) +
+                                        ", " + str(p))
                     msg = CommonConnection.sendMessage(s, h, p, fName, data,
                                                        posBeforeRead)
                     msgQueue.put(QueueHandler.makeMessageExpected(msg, addr))
